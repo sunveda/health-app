@@ -56,12 +56,13 @@ jobs:
       - name: Set up Android SDK
         uses: android-actions/setup-android@v3
 
-      - name: Build and test Android app
-        uses: gradle/gradle-build-action@v3
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v4
         with:
           gradle-version: "8.10"
-          arguments: --no-daemon test assembleDebug
-          build-root-directory: apps/android
+
+      - name: Build and test Android app
+        run: gradle --no-daemon test assembleDebug
 
   ios:
     name: iOS build and test
@@ -80,7 +81,11 @@ jobs:
 
       - name: Generate Xcode project
         shell: bash
-        run: xcodegen generate --spec project.yml
+        run: |
+          set -euo pipefail
+          xcodegen generate --spec project.yml
+          # XcodeGen currently emits project format 77; macos-14 ships Xcode 15.
+          sed -i '' 's/objectVersion = 77;/objectVersion = 56;/' HealthApp.xcodeproj/project.pbxproj
 
       - name: Build and test iOS app
         shell: bash
