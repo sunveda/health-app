@@ -1,0 +1,95 @@
+name: Native CI
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+concurrency:
+  group: native-ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  contracts:
+    name: Validate shared contracts
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Validate JSON schemas and repository whitespace
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+
+          for path in Path("packages/contracts").rglob("*.json"):
+              json.loads(path.read_text(encoding="utf-8"))
+              print(f"Validated {path}")
+          PY
+          git diff --check
+
+  android:
+    name: Android build and test
+    runs-on: ubuntu-latest
+    needs: contracts
+    defaults:
+      run:
+        working-directory: apps/android
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+          cache: gradle
+
+      - name: Set up Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Build and test Android app
+        uses: gradle/gradle-build-action@v3
+        with:
+          gradle-version: "8.10"
+          arguments: --no-daemon test assembleDebug
+          build-root-directory: apps/android
+
+  ios:
+    name: iOS build and test
+    runs-on: macos-14
+    needs: contracts
+    defaults:
+      run:
+        working-directory: apps/ios
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up XcodeGen
+        shell: bash
+        run: brew install xcodegen
+
+      - name: Generate Xcode project
+        shell: bash
+        run: xcodegen generate --spec project.yml
+
+      - name: Build and test iOS app
+        shell: bash
+        run: |
+          set -euo pipefail
+          xcodebuild \
+            -project HealthApp.xcodeproj \
+            -scheme HealthApp \
+            -sdk iphonesimulator \
+            -destination 'platform=iOS Simulator,name=iPhone 15' \
+            CODE_SIGNING_ALLOWED=NO \
+            test
