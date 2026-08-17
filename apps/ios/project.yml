@@ -21,5 +21,24 @@ targets:
         INFOPLIST_KEY_CFBundleDisplayName: My Health
         INFOPLIST_KEY_NSHumanReadableCopyright: ""
         SWIFT_EMIT_LOC_STRINGS: YES
-    scheme:
-      testTargets: []
+  HealthAppTests:
+    type: bundle.unit-test
+    platform: iOS
+    deploymentTarget: "17.0"
+    sources:
+      - path: HealthAppTests
+    dependencies:
+      - target: HealthApp
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.sunveda.healthapp.tests
+
+schemes:
+  HealthApp:
+    build:
+      targets:
+        HealthApp: all
+        HealthAppTests: [test]
+    test:
+      targets:
+        - HealthAppTests
