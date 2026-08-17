@@ -1,0 +1,40 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://health-app.sunveda.dev/schemas/portal.json",
+  "title": "Health Portal Contracts",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "identity": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "pairwiseSub": { "type": "string", "minLength": 1 },
+        "displayName": { "type": "string" },
+        "verifiedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["pairwiseSub", "verifiedAt"]
+    },
+    "wellnessSync": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "platform": { "enum": ["ios_healthkit", "android_health_connect"] },
+        "status": { "enum": ["not_connected", "connected", "permission_denied", "error"] },
+        "lastSyncedAt": { "type": ["string", "null"], "format": "date-time" }
+      },
+      "required": ["platform", "status", "lastSyncedAt"]
+    },
+    "medicalExpenses": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "taxYear": { "type": "integer", "minimum": 2000 },
+        "eligibleAmountJpy": { "type": "integer", "minimum": 0 },
+        "calculationStatus": { "enum": ["not_available", "review_required", "ready_for_export"] }
+      },
+      "required": ["taxYear", "eligibleAmountJpy", "calculationStatus"]
+    }
+  },
+  "required": ["identity", "wellnessSync", "medicalExpenses"]
+}
