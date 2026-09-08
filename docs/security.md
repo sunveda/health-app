@@ -31,6 +31,10 @@ Before production integration, review at minimum: authorization-code interceptio
 
 The product team must document the lawful basis and purpose for each data category, user notices and consent language, retention periods, deletion/export procedures, processor and subprocessor responsibilities, access review, incident notification, and the exact requirements of applicable Japanese privacy and My Number regulations. Cloud certifications and security controls support a compliance program but do not replace product-specific legal review.
 
+## Stage 1.5 baseline
+
+Classification, on-device vs later-sync principles, logging redaction, the crash-reporting **not configured** decision, and consent/purpose scaffolding are in [`privacy-baseline.md`](privacy-baseline.md). Lawful basis and user-facing legal copy remain TODO for product/legal.
+
 ## Development safeguards
 
 Pull requests should include a data-classification note for new fields, tests for authorization and redaction, dependency review, and a statement about whether a new native permission is introduced. CI should scan for secrets and prohibited sample data. Fixtures must use synthetic values that cannot be mistaken for real identity or medical records.

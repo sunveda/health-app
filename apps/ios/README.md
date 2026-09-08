@@ -15,4 +15,4 @@ The bundle identifier is currently the placeholder `com.sunveda.healthapp`. The 
 
 ## Native capability boundaries
 
-HealthKit, Keychain, LocalAuthentication, document providers, NFC, and the approved OIDC/PKCE flow must be implemented only under `HealthApp/Core` adapters constructed by `CompositionRoot`. Feature views consume `AppDependencies` and must not import those frameworks. Current stubs are NotConfigured / Unavailable and do not request permissions.
+HealthKit, Keychain (`import Security` / SecItem), LocalAuthentication, document providers, NFC, and the approved OIDC/PKCE flow must be implemented only under `HealthApp/Core` adapters constructed by `CompositionRoot`. Feature views consume `AppDependencies` and must not import those frameworks. Current stubs are NotConfigured / Unavailable and do not request permissions. `ConsentStore`, `CrashReporter`, and `TelemetryPolicy` follow the same pattern (crash reporting is not configured; no DSN).

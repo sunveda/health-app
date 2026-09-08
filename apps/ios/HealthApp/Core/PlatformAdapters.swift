@@ -33,3 +33,22 @@ protocol IdentitySession {
     var status: CapabilityStatus { get }
     func pairwiseSubject() -> String?
 }
+
+/// Records category + granted/denied + purpose id only. No sensitive payloads.
+protocol ConsentStore {
+    var status: CapabilityStatus { get }
+    func decision(for category: DataCategory) -> ConsentDecision
+    func record(decision: ConsentDecision, for category: DataCategory, purposeId: String) -> Result<Void, CapabilityError>
+}
+
+/// Crash reporting is not configured; implementations must never send PII or a DSN-backed payload.
+protocol CrashReporter {
+    var status: CapabilityStatus { get }
+    func captureNonPII(event: String) -> Result<Void, CapabilityError>
+}
+
+/// Telemetry allow/deny by data category. NotConfigured implementations deny every category.
+protocol TelemetryPolicy {
+    var status: CapabilityStatus { get }
+    func isAllowed(_ category: DataCategory) -> Bool
+}

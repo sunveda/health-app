@@ -105,3 +105,82 @@ struct UnavailableIdentitySession: IdentitySession {
         nil
     }
 }
+
+struct NotConfiguredConsentStore: ConsentStore {
+    let status = CapabilityStatus.notConfigured
+
+    func decision(for _: DataCategory) -> ConsentDecision {
+        .notRecorded
+    }
+
+    func record(decision _: ConsentDecision, for _: DataCategory, purposeId _: String) -> Result<Void, CapabilityError> {
+        .failure(.notConfigured)
+    }
+}
+
+struct UnavailableConsentStore: ConsentStore {
+    let status = CapabilityStatus.unavailable
+
+    func decision(for _: DataCategory) -> ConsentDecision {
+        .notRecorded
+    }
+
+    func record(decision _: ConsentDecision, for _: DataCategory, purposeId _: String) -> Result<Void, CapabilityError> {
+        .failure(.unavailable)
+    }
+}
+
+/// Test/scaffolding store: category + decision only, no disk, no sensitive payloads.
+/// Not wired by CompositionRoot.
+final class InMemoryConsentStore: ConsentStore {
+    let status = CapabilityStatus.ready
+    private var decisions: [DataCategory: ConsentDecision] = [:]
+
+    func decision(for category: DataCategory) -> ConsentDecision {
+        decisions[category] ?? .notRecorded
+    }
+
+    func record(decision: ConsentDecision, for category: DataCategory, purposeId: String) -> Result<Void, CapabilityError> {
+        guard decision != .notRecorded else {
+            decisions.removeValue(forKey: category)
+            return .success(())
+        }
+        guard PurposeRegistry.definition(id: purposeId)?.category == category else {
+            return .failure(.unavailable)
+        }
+        decisions[category] = decision
+        return .success(())
+    }
+}
+
+struct NotConfiguredCrashReporter: CrashReporter {
+    let status = CapabilityStatus.notConfigured
+
+    func captureNonPII(event _: String) -> Result<Void, CapabilityError> {
+        .failure(.notConfigured)
+    }
+}
+
+struct UnavailableCrashReporter: CrashReporter {
+    let status = CapabilityStatus.unavailable
+
+    func captureNonPII(event _: String) -> Result<Void, CapabilityError> {
+        .failure(.unavailable)
+    }
+}
+
+struct NotConfiguredTelemetryPolicy: TelemetryPolicy {
+    let status = CapabilityStatus.notConfigured
+
+    func isAllowed(_: DataCategory) -> Bool {
+        false
+    }
+}
+
+struct UnavailableTelemetryPolicy: TelemetryPolicy {
+    let status = CapabilityStatus.unavailable
+
+    func isAllowed(_: DataCategory) -> Bool {
+        false
+    }
+}

@@ -7,6 +7,9 @@ data class PlatformDependencies(
     val healthDataSource: HealthDataSource,
     val nfcCapability: NfcCapability,
     val identitySession: IdentitySession,
+    val consentStore: ConsentStore,
+    val crashReporter: CrashReporter,
+    val telemetryPolicy: TelemetryPolicy,
 )
 
 /** Single composition root. The only type allowed to construct platform adapter implementations. */
@@ -18,5 +21,8 @@ object CompositionRoot {
             healthDataSource = NotConfiguredHealthDataSource(),
             nfcCapability = NotConfiguredNfcCapability(),
             identitySession = NotConfiguredIdentitySession(),
+            consentStore = NotConfiguredConsentStore(),
+            crashReporter = NotConfiguredCrashReporter(),
+            telemetryPolicy = NotConfiguredTelemetryPolicy(),
         )
 }

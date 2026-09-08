@@ -23,7 +23,7 @@ The applications share **contracts**, not UI code. This avoids a lowest-common-d
 
 ## Current status
 
-The repository contains native application shells, a Core/platform composition root with NotConfigured adapters, shared contract schemas, and security documentation. The My Number identity-provider integration, HealthKit and Health Connect permissions, NFC reader support, secure upload pipeline, backend services, and Vertex AI workflows are deliberately not wired to guessed endpoints or credentials. Those integrations require official provider documentation, app registration, compliance approval, and threat-model review.
+The repository contains native application shells, a Core/platform composition root with NotConfigured adapters (including consent, crash reporting, and telemetry policy stubs), shared contract schemas, and security/privacy baseline documentation. The My Number identity-provider integration, HealthKit and Health Connect permissions, NFC reader support, secure upload pipeline, backend services, and Vertex AI workflows are deliberately not wired to guessed endpoints or credentials. Those integrations require official provider documentation, app registration, compliance approval, and threat-model review.
 
 ## Working locally
 
@@ -39,4 +39,4 @@ Open `apps/android` in Android Studio and sync the Gradle project. The current t
 
 The application follows data minimization, explicit consent, least privilege, zero-trust service boundaries, encrypted storage, and auditable access. Sensitive identity and health data must be excluded from logs and analytics by default. Any implementation of My Number Card authentication must use the official Japanese identity-provider documentation and a security review; the specification’s example scopes and flows are not treated as proof that a production endpoint or permission is available.
 
-See [`docs/architecture.md`](docs/architecture.md) and [`docs/security.md`](docs/security.md) for the current design boundaries and open decisions.
+See [`docs/architecture.md`](docs/architecture.md), [`docs/security.md`](docs/security.md), and [`docs/privacy-baseline.md`](docs/privacy-baseline.md) for the current design boundaries and open decisions.

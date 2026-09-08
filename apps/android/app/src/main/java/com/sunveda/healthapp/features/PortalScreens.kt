@@ -68,6 +68,21 @@ fun SettingsScreen(dependencies: PlatformDependencies, modifier: Modifier = Modi
             modifier = Modifier.padding(top = 4.dp),
             style = MaterialTheme.typography.bodyMedium,
         )
+        Text(
+            text = "Consent store: ${dependencies.consentStore.status.toDisplayLabel()}",
+            modifier = Modifier.padding(top = 4.dp),
+            style = MaterialTheme.typography.bodyMedium,
+        )
+        Text(
+            text = "Crash reporting: ${dependencies.crashReporter.status.toDisplayLabel()}",
+            modifier = Modifier.padding(top = 4.dp),
+            style = MaterialTheme.typography.bodyMedium,
+        )
+        Text(
+            text = "Telemetry: ${dependencies.telemetryPolicy.status.toDisplayLabel()}",
+            modifier = Modifier.padding(top = 4.dp),
+            style = MaterialTheme.typography.bodyMedium,
+        )
     }
 }
 
