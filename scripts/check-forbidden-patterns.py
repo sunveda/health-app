@@ -29,6 +29,11 @@ CODE_SUFFIXES = (
     ".mm",
     ".h",
     ".gradle",
+    ".plist",
+    ".entitlements",
+    ".xml",
+    ".yml",
+    ".yaml",
 )
 
 SKIP_PATH_PREFIXES = (
@@ -48,7 +53,22 @@ OBVIOUS_TOKEN = re.compile(
 )
 
 KIT_PATTERNS = (
-    ("HealthKit import/usage", re.compile(r"(?m)^\s*import HealthKit\b|\bHKHealthStore\b")),
+    (
+        "HealthKit import/usage",
+        re.compile(
+            r"(?m)^\s*import HealthKit\b|"
+            r"\bHKHealthStore\b|"
+            r"\bHKSampleQuery\b|"
+            r"\bHKAnchoredObjectQuery\b|"
+            r"\bHKStatisticsQuery\b|"
+            r"\bHKObserverQuery\b|"
+            r"\bHKWorkoutSession\b|"
+            r"HealthKit\.framework|"
+            r"com\.apple\.developer\.healthkit|"
+            r"\bNSHealthShareUsageDescription\b|"
+            r"\bNSHealthUpdateUsageDescription\b"
+        ),
+    ),
     ("CoreNFC import/usage", re.compile(r"(?m)^\s*import CoreNFC\b|\bNFCTagReaderSession\b|\bNFCNDEFReaderSession\b")),
     (
         "LocalAuthentication import/usage",
@@ -65,7 +85,15 @@ KIT_PATTERNS = (
     ),
     (
         "Health Connect import/usage",
-        re.compile(r"androidx\.health\.connect\b|\bHealthConnectClient\b"),
+        re.compile(
+            r"androidx\.health\.connect\b|"
+            r"android\.health\.connect\b|"
+            r"\bHealthConnectClient\b|"
+            r"\bHealthConnectManager\b|"
+            r"\bReadRecordsRequest\b|"
+            r"\bHealthPermission\b|"
+            r"android\.permission\.health\."
+        ),
     ),
     (
         "BiometricPrompt import/usage",

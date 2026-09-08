@@ -3,10 +3,10 @@ import XCTest
 
 final class HealthAppTests: XCTestCase {
     func testDisplayLabelMapsAdapterStatuses() {
-        XCTAssertEqual(displayLabel(for: .notConfigured), "Not configured")
-        XCTAssertEqual(displayLabel(for: .unavailable), "Unavailable")
-        XCTAssertEqual(displayLabel(for: .ready), "Ready")
-        XCTAssertEqual(displayLabel(for: .permissionRequired), "Permission required")
+        XCTAssertEqual(displayLabel(for: CapabilityStatus.notConfigured), "Not configured")
+        XCTAssertEqual(displayLabel(for: CapabilityStatus.unavailable), "Unavailable")
+        XCTAssertEqual(displayLabel(for: CapabilityStatus.ready), "Ready")
+        XCTAssertEqual(displayLabel(for: CapabilityStatus.permissionRequired), "Permission required")
     }
 
     func testCompositionRootWiresNotConfiguredAdapters() {
@@ -16,6 +16,14 @@ final class HealthAppTests: XCTestCase {
         XCTAssertEqual(dependencies.secureStore.biometricGatedStoreStatus, .notConfigured)
         XCTAssertEqual(dependencies.biometricUnlock.status, .notConfigured)
         XCTAssertEqual(dependencies.healthDataSource.status, .notConfigured)
+        XCTAssertEqual(dependencies.healthDataSource.permissionState, .notConfigured)
+        XCTAssertTrue(dependencies.healthDataSource.grantedReadScopes.isEmpty)
+        XCTAssertEqual(dependencies.healthDataSource.lastFailure, .notConfigured)
+        XCTAssertEqual(dependencies.wellnessSync.status, .notConfigured)
+        XCTAssertEqual(dependencies.wellnessSync.featureFlag, .disabled)
+        XCTAssertFalse(dependencies.wellnessSync.featureFlag.isEnabled)
+        XCTAssertEqual(WellnessFeatureFlag.shipping, .disabled)
+        XCTAssertNil(dependencies.wellnessSync.lastSyncedAt)
         XCTAssertEqual(dependencies.nfcCapability.status, .notConfigured)
         XCTAssertEqual(dependencies.identitySession.status, .notConfigured)
         XCTAssertNil(dependencies.identitySession.pairwiseSubject())
@@ -45,6 +53,7 @@ final class HealthAppTests: XCTestCase {
         let dependencies = CompositionRoot.make()
         _ = RootView(dependencies: dependencies)
         XCTAssertEqual(displayLabel(for: dependencies.healthDataSource.status), "Not configured")
+        XCTAssertEqual(displayLabel(for: dependencies.wellnessSync.status), "Not configured")
         XCTAssertEqual(displayLabel(for: dependencies.consentStore.status), "Not configured")
         XCTAssertEqual(displayLabel(for: dependencies.crashReporter.status), "Not configured")
     }
@@ -161,6 +170,104 @@ final class HealthAppTests: XCTestCase {
         XCTAssertFalse(joined.contains("個人情報保護法"))
         XCTAssertFalse(joined.contains("番号法"))
         XCTAssertFalse(joined.contains("appi"))
+    }
+
+    func testWellnessContractMappingCoversStubAndLaterStates() {
+        XCTAssertEqual(
+            WellnessContractMapping.status(from: .notConfigured, lastSyncedAt: nil),
+            .notConnected
+        )
+        XCTAssertEqual(
+            WellnessContractMapping.status(from: .unavailable, lastSyncedAt: nil),
+            .error
+        )
+
+        let denied = WellnessCapabilitySnapshot(
+            availability: .permissionRequired,
+            permissionState: .denied,
+            grantedReadScopes: [],
+            lastFailure: nil
+        )
+        XCTAssertEqual(WellnessContractMapping.status(from: denied, lastSyncedAt: nil), .permissionDenied)
+
+        let readyUnsynced = WellnessCapabilitySnapshot(
+            availability: .ready,
+            permissionState: .authorized,
+            grantedReadScopes: [.steps],
+            lastFailure: nil
+        )
+        XCTAssertEqual(WellnessContractMapping.status(from: readyUnsynced, lastSyncedAt: nil), .notConnected)
+        XCTAssertEqual(
+            WellnessContractMapping.status(from: readyUnsynced, lastSyncedAt: Date(timeIntervalSince1970: 1)),
+            .connected
+        )
+
+        let failedReady = WellnessCapabilitySnapshot(
+            availability: .ready,
+            permissionState: .authorized,
+            grantedReadScopes: [.steps, .heartRate],
+            lastFailure: .unavailable
+        )
+        XCTAssertEqual(
+            WellnessContractMapping.status(from: failedReady, lastSyncedAt: Date(timeIntervalSince1970: 1)),
+            .error
+        )
+    }
+
+    func testWellnessPresentationAndPermissionLabels() {
+        XCTAssertEqual(WellnessPresentation.scopesLabel([]), "None")
+        XCTAssertEqual(WellnessPresentation.scopesLabel([.heartRate]), "Heart rate")
+        XCTAssertEqual(WellnessPresentation.scopesLabel([.heartRate, .steps]), "Steps, Heart rate")
+        XCTAssertEqual(displayLabel(forPermission: .notConfigured), "Not configured")
+        XCTAssertEqual(displayLabel(forPermission: .denied), "Denied")
+        XCTAssertEqual(displayLabel(forPermission: .authorized), "Authorized")
+        XCTAssertEqual(displayLabel(forFeatureFlag: .disabled), "Disabled")
+        XCTAssertEqual(displayLabel(forFeatureFlag: .enabled), "Enabled")
+    }
+
+    func testNotConfiguredWellnessAdaptersRejectReadsAndKeepEmptyScopes() {
+        let source = NotConfiguredHealthDataSource()
+        XCTAssertEqual(source.status, .notConfigured)
+        XCTAssertEqual(source.permissionState, .notConfigured)
+        XCTAssertTrue(source.grantedReadScopes.isEmpty)
+        XCTAssertEqual(source.lastFailure, .notConfigured)
+        XCTAssertEqual(source.capabilitySnapshot(), .notConfigured)
+        assertFailure(source.requestReadAccess(scopes: []), .notConfigured)
+        assertFailure(source.requestReadAccess(scopes: [.steps, .heartRate]), .notConfigured)
+        XCTAssertTrue(source.grantedReadScopes.isEmpty)
+
+        let unavailable = UnavailableHealthDataSource()
+        XCTAssertEqual(unavailable.capabilitySnapshot(), .unavailable)
+        assertFailure(unavailable.requestReadAccess(scopes: [.steps]), .unavailable)
+
+        let sync = NotConfiguredWellnessSyncClient()
+        XCTAssertEqual(sync.status, .notConfigured)
+        XCTAssertEqual(sync.featureFlag, .disabled)
+        XCTAssertNil(sync.lastSyncedAt)
+        assertFailure(sync.sync(), .notConfigured)
+        XCTAssertEqual(
+            WellnessContractMapping.status(from: source.capabilitySnapshot(), lastSyncedAt: sync.lastSyncedAt),
+            .notConnected
+        )
+
+        let unavailableSync = UnavailableWellnessSyncClient()
+        assertFailure(unavailableSync.sync(), .unavailable)
+    }
+
+    func testWellnessCopyDoesNotClaimKitWiringOrCompletedStages() {
+        let copy = [
+            WellnessCopyPlaceholder.kitWiringDeferred,
+            WellnessCopyPlaceholder.featureDisabled,
+        ]
+        for line in copy {
+            XCTAssertFalse(line.isEmpty)
+        }
+        let joined = copy.joined(separator: " ").lowercased()
+        XCTAssertTrue(joined.contains("not configured") || joined.contains("disabled"))
+        XCTAssertTrue(joined.contains("deferred") || joined.contains("disabled"))
+        XCTAssertFalse(joined.contains("connected to healthkit"))
+        XCTAssertFalse(joined.contains("identity complete"))
+        XCTAssertFalse(joined.contains("clinical complete"))
     }
 }
 

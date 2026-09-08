@@ -77,3 +77,5 @@ Each data category needs:
 User-facing consent language, withdrawal copy, and retention notices are **TODO for product/legal**. Do not treat engineering purpose summaries as official notices. Settings screens show `PrivacyCopyPlaceholder` strings that repeat that TODO; they are not statute citations.
 
 Identity remains blocked on IdP registration, official scopes, threat-model, and legal review. This baseline does not unblock OIDC, biometrics, HealthKit, Health Connect, NFC, or backend clients.
+
+Wellness NotConfigured adapter notes (intended later read scopes, deferred kit wiring, feature flag) live in [`wellness-baseline.md`](wellness-baseline.md). Those stubs do not complete Wellness.

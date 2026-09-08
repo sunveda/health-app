@@ -5,6 +5,7 @@ struct AppDependencies {
     let secureStore: SecureStore
     let biometricUnlock: BiometricUnlock
     let healthDataSource: HealthDataSource
+    let wellnessSync: WellnessSyncClient
     let nfcCapability: NfcCapability
     let identitySession: IdentitySession
     let consentStore: ConsentStore
@@ -19,6 +20,7 @@ enum CompositionRoot {
             secureStore: NotConfiguredSecureStore(),
             biometricUnlock: NotConfiguredBiometricUnlock(),
             healthDataSource: NotConfiguredHealthDataSource(),
+            wellnessSync: NotConfiguredWellnessSyncClient(),
             nfcCapability: NotConfiguredNfcCapability(),
             identitySession: NotConfiguredIdentitySession(),
             consentStore: NotConfiguredConsentStore(),

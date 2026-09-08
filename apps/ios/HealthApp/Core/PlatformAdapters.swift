@@ -20,8 +20,35 @@ protocol BiometricUnlock {
     func unlock() -> Result<Void, CapabilityError>
 }
 
+/// Device-health adapter. Stubs must not call HealthKit; they expose availability, permission, scope, and failure only.
 protocol HealthDataSource {
     var status: CapabilityStatus { get }
+    var permissionState: HealthPermissionState { get }
+    var grantedReadScopes: Set<WellnessReadScope> { get }
+    var lastFailure: CapabilityError? { get }
+
+    /// Never prompts the system on stubs; returns not configured / unavailable.
+    func requestReadAccess(scopes: Set<WellnessReadScope>) -> Result<Void, CapabilityError>
+}
+
+extension HealthDataSource {
+    func capabilitySnapshot() -> WellnessCapabilitySnapshot {
+        WellnessCapabilitySnapshot(
+            availability: status,
+            permissionState: permissionState,
+            grantedReadScopes: grantedReadScopes,
+            lastFailure: lastFailure
+        )
+    }
+}
+
+/// Feature-facing wellness sync. Screens depend on this instead of importing device kits.
+protocol WellnessSyncClient {
+    var featureFlag: WellnessFeatureFlag { get }
+    var status: CapabilityStatus { get }
+    var lastSyncedAt: Date? { get }
+
+    func sync() -> Result<Void, CapabilityError>
 }
 
 protocol NfcCapability {

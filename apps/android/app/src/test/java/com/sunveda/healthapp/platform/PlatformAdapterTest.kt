@@ -3,6 +3,7 @@ package com.sunveda.healthapp.platform
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
 import org.junit.Test
+import java.time.Instant
 
 class CapabilityStatusMappingTest {
     @Test
@@ -23,6 +24,14 @@ class CompositionRootTest {
         assertEquals(CapabilityStatus.NOT_CONFIGURED, dependencies.secureStore.biometricGatedStoreStatus)
         assertEquals(CapabilityStatus.NOT_CONFIGURED, dependencies.biometricUnlock.status)
         assertEquals(CapabilityStatus.NOT_CONFIGURED, dependencies.healthDataSource.status)
+        assertEquals(HealthPermissionState.NOT_CONFIGURED, dependencies.healthDataSource.permissionState)
+        assertEquals(true, dependencies.healthDataSource.grantedReadScopes.isEmpty())
+        assertEquals(CapabilityStatus.NOT_CONFIGURED, dependencies.healthDataSource.lastFailure)
+        assertEquals(CapabilityStatus.NOT_CONFIGURED, dependencies.wellnessSync.status)
+        assertEquals(WellnessFeatureFlag.DISABLED, dependencies.wellnessSync.featureFlag)
+        assertEquals(false, dependencies.wellnessSync.featureFlag.isEnabled)
+        assertEquals(WellnessFeatureFlag.DISABLED, WellnessFeatureFlag.shipping)
+        assertNull(dependencies.wellnessSync.lastSyncedAt)
         assertEquals(CapabilityStatus.NOT_CONFIGURED, dependencies.nfcCapability.status)
         assertEquals(CapabilityStatus.NOT_CONFIGURED, dependencies.identitySession.status)
         assertNull(dependencies.identitySession.pairwiseSubject())
@@ -193,5 +202,133 @@ class PrivacyBaselineTest {
         assertEquals(false, joined.contains("個人情報保護法"))
         assertEquals(false, joined.contains("番号法"))
         assertEquals(false, joined.contains("appi"))
+    }
+}
+
+class WellnessBaselineTest {
+    @Test
+    fun contractMappingCoversStubAndLaterStates() {
+        assertEquals(
+            WellnessContractStatus.NOT_CONNECTED,
+            WellnessContractMapping.status(WellnessCapabilitySnapshot.notConfigured, null),
+        )
+        assertEquals(
+            WellnessContractStatus.ERROR,
+            WellnessContractMapping.status(WellnessCapabilitySnapshot.unavailable, null),
+        )
+
+        val denied = WellnessCapabilitySnapshot(
+            availability = CapabilityStatus.PERMISSION_REQUIRED,
+            permissionState = HealthPermissionState.DENIED,
+            grantedReadScopes = emptySet(),
+            lastFailure = null,
+        )
+        assertEquals(
+            WellnessContractStatus.PERMISSION_DENIED,
+            WellnessContractMapping.status(denied, null),
+        )
+
+        val readyUnsynced = WellnessCapabilitySnapshot(
+            availability = CapabilityStatus.READY,
+            permissionState = HealthPermissionState.AUTHORIZED,
+            grantedReadScopes = setOf(WellnessReadScope.STEPS),
+            lastFailure = null,
+        )
+        assertEquals(
+            WellnessContractStatus.NOT_CONNECTED,
+            WellnessContractMapping.status(readyUnsynced, null),
+        )
+        assertEquals(
+            WellnessContractStatus.CONNECTED,
+            WellnessContractMapping.status(readyUnsynced, Instant.ofEpochSecond(1)),
+        )
+
+        val failedReady = WellnessCapabilitySnapshot(
+            availability = CapabilityStatus.READY,
+            permissionState = HealthPermissionState.AUTHORIZED,
+            grantedReadScopes = setOf(WellnessReadScope.STEPS, WellnessReadScope.HEART_RATE),
+            lastFailure = CapabilityStatus.UNAVAILABLE,
+        )
+        assertEquals(
+            WellnessContractStatus.ERROR,
+            WellnessContractMapping.status(failedReady, Instant.ofEpochSecond(1)),
+        )
+    }
+
+    @Test
+    fun presentationAndPermissionLabels() {
+        assertEquals("None", WellnessPresentation.scopesLabel(emptySet()))
+        assertEquals("Heart rate", WellnessPresentation.scopesLabel(setOf(WellnessReadScope.HEART_RATE)))
+        assertEquals(
+            "Steps, Heart rate",
+            WellnessPresentation.scopesLabel(setOf(WellnessReadScope.HEART_RATE, WellnessReadScope.STEPS)),
+        )
+        assertEquals("Not configured", HealthPermissionState.NOT_CONFIGURED.toDisplayLabel())
+        assertEquals("Denied", HealthPermissionState.DENIED.toDisplayLabel())
+        assertEquals("Authorized", HealthPermissionState.AUTHORIZED.toDisplayLabel())
+        assertEquals("Disabled", WellnessFeatureFlag.DISABLED.toDisplayLabel())
+        assertEquals("Enabled", WellnessFeatureFlag.ENABLED.toDisplayLabel())
+    }
+
+    @Test
+    fun notConfiguredAdaptersRejectReadsAndKeepEmptyScopes() {
+        val source = NotConfiguredHealthDataSource()
+        assertEquals(CapabilityStatus.NOT_CONFIGURED, source.status)
+        assertEquals(HealthPermissionState.NOT_CONFIGURED, source.permissionState)
+        assertEquals(true, source.grantedReadScopes.isEmpty())
+        assertEquals(CapabilityStatus.NOT_CONFIGURED, source.lastFailure)
+        assertEquals(WellnessCapabilitySnapshot.notConfigured, source.capabilitySnapshot())
+        assertEquals(
+            CapabilityOutcome.Unavailable(CapabilityStatus.NOT_CONFIGURED),
+            source.requestReadAccess(emptySet()),
+        )
+        assertEquals(
+            CapabilityOutcome.Unavailable(CapabilityStatus.NOT_CONFIGURED),
+            source.requestReadAccess(setOf(WellnessReadScope.STEPS, WellnessReadScope.HEART_RATE)),
+        )
+        assertEquals(true, source.grantedReadScopes.isEmpty())
+
+        val unavailable = UnavailableHealthDataSource()
+        assertEquals(WellnessCapabilitySnapshot.unavailable, unavailable.capabilitySnapshot())
+        assertEquals(
+            CapabilityOutcome.Unavailable(CapabilityStatus.UNAVAILABLE),
+            unavailable.requestReadAccess(setOf(WellnessReadScope.STEPS)),
+        )
+
+        val sync = NotConfiguredWellnessSyncClient()
+        assertEquals(CapabilityStatus.NOT_CONFIGURED, sync.status)
+        assertEquals(WellnessFeatureFlag.DISABLED, sync.featureFlag)
+        assertNull(sync.lastSyncedAt)
+        assertEquals(
+            CapabilityOutcome.Unavailable(CapabilityStatus.NOT_CONFIGURED),
+            sync.sync(),
+        )
+        assertEquals(
+            WellnessContractStatus.NOT_CONNECTED,
+            WellnessContractMapping.status(source.capabilitySnapshot(), sync.lastSyncedAt),
+        )
+
+        val unavailableSync = UnavailableWellnessSyncClient()
+        assertEquals(
+            CapabilityOutcome.Unavailable(CapabilityStatus.UNAVAILABLE),
+            unavailableSync.sync(),
+        )
+    }
+
+    @Test
+    fun copyDoesNotClaimKitWiringOrCompletedStages() {
+        val copy = listOf(
+            WellnessCopyPlaceholder.KIT_WIRING_DEFERRED,
+            WellnessCopyPlaceholder.FEATURE_DISABLED,
+        )
+        copy.forEach { line ->
+            assertEquals(true, line.isNotBlank())
+        }
+        val joined = copy.joinToString(" ").lowercase()
+        assertEquals(true, joined.contains("not configured") || joined.contains("disabled"))
+        assertEquals(true, joined.contains("deferred") || joined.contains("disabled"))
+        assertEquals(false, joined.contains("connected to healthkit"))
+        assertEquals(false, joined.contains("identity complete"))
+        assertEquals(false, joined.contains("clinical complete"))
     }
 }
