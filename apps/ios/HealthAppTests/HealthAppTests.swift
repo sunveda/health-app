@@ -3,10 +3,10 @@ import XCTest
 
 final class HealthAppTests: XCTestCase {
     func testDisplayLabelMapsAdapterStatuses() {
-        XCTAssertEqual(displayLabel(for: .notConfigured), "Not configured")
-        XCTAssertEqual(displayLabel(for: .unavailable), "Unavailable")
-        XCTAssertEqual(displayLabel(for: .ready), "Ready")
-        XCTAssertEqual(displayLabel(for: .permissionRequired), "Permission required")
+        XCTAssertEqual(displayLabel(for: CapabilityStatus.notConfigured), "Not configured")
+        XCTAssertEqual(displayLabel(for: CapabilityStatus.unavailable), "Unavailable")
+        XCTAssertEqual(displayLabel(for: CapabilityStatus.ready), "Ready")
+        XCTAssertEqual(displayLabel(for: CapabilityStatus.permissionRequired), "Permission required")
     }
 
     func testCompositionRootWiresNotConfiguredAdapters() {
@@ -218,11 +218,11 @@ final class HealthAppTests: XCTestCase {
         XCTAssertEqual(WellnessPresentation.scopesLabel([]), "None")
         XCTAssertEqual(WellnessPresentation.scopesLabel([.heartRate]), "Heart rate")
         XCTAssertEqual(WellnessPresentation.scopesLabel([.heartRate, .steps]), "Steps, Heart rate")
-        XCTAssertEqual(displayLabel(for: HealthPermissionState.notConfigured), "Not configured")
-        XCTAssertEqual(displayLabel(for: HealthPermissionState.denied), "Denied")
-        XCTAssertEqual(displayLabel(for: HealthPermissionState.authorized), "Authorized")
-        XCTAssertEqual(displayLabel(for: WellnessFeatureFlag.disabled), "Disabled")
-        XCTAssertEqual(displayLabel(for: WellnessFeatureFlag.enabled), "Enabled")
+        XCTAssertEqual(displayLabel(forPermission: .notConfigured), "Not configured")
+        XCTAssertEqual(displayLabel(forPermission: .denied), "Denied")
+        XCTAssertEqual(displayLabel(forPermission: .authorized), "Authorized")
+        XCTAssertEqual(displayLabel(forFeatureFlag: .disabled), "Disabled")
+        XCTAssertEqual(displayLabel(forFeatureFlag: .enabled), "Enabled")
     }
 
     func testNotConfiguredWellnessAdaptersRejectReadsAndKeepEmptyScopes() {

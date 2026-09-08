@@ -51,7 +51,7 @@ struct HealthView: View {
 
                 Section("Wellness") {
                     LabeledContent("Permission") {
-                        Text(displayLabel(for: snapshot.permissionState))
+                        Text(displayLabel(forPermission: snapshot.permissionState))
                             .foregroundStyle(.secondary)
                     }
                     LabeledContent("Read scopes") {
@@ -63,7 +63,7 @@ struct HealthView: View {
                             .foregroundStyle(.secondary)
                     }
                     LabeledContent("Feature flag") {
-                        Text(displayLabel(for: dependencies.wellnessSync.featureFlag))
+                        Text(displayLabel(forFeatureFlag: dependencies.wellnessSync.featureFlag))
                             .foregroundStyle(.secondary)
                     }
                     Text(WellnessCopyPlaceholder.kitWiringDeferred)
@@ -131,7 +131,7 @@ struct SettingsView: View {
                             .foregroundStyle(.secondary)
                     }
                     LabeledContent("Feature flag") {
-                        Text(displayLabel(for: dependencies.wellnessSync.featureFlag))
+                        Text(displayLabel(forFeatureFlag: dependencies.wellnessSync.featureFlag))
                             .foregroundStyle(.secondary)
                     }
                     Text(WellnessCopyPlaceholder.featureDisabled)

@@ -87,7 +87,7 @@ enum WellnessContractMapping {
     }
 }
 
-func displayLabel(for permission: HealthPermissionState) -> String {
+func displayLabel(forPermission permission: HealthPermissionState) -> String {
     switch permission {
     case .notConfigured:
         return "Not configured"
@@ -102,7 +102,7 @@ func displayLabel(for permission: HealthPermissionState) -> String {
     }
 }
 
-func displayLabel(for flag: WellnessFeatureFlag) -> String {
+func displayLabel(forFeatureFlag flag: WellnessFeatureFlag) -> String {
     flag.isEnabled ? "Enabled" : "Disabled"
 }
 
