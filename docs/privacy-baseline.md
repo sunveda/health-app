@@ -74,6 +74,6 @@ Each data category needs:
 
 `ConsentStore` records only category + decision + purpose id. It must not persist report contents, individual numbers, or other sensitive payloads. CompositionRoot currently wires `NotConfiguredConsentStore` (operations fail; status is not configured). An in-memory store exists for unit tests and is not a production consent ledger (no disk, no legal copy).
 
-User-facing consent language, withdrawal copy, and retention notices are **TODO for product/legal**. Do not treat engineering purpose summaries as official notices.
+User-facing consent language, withdrawal copy, and retention notices are **TODO for product/legal**. Do not treat engineering purpose summaries as official notices. Settings screens show `PrivacyCopyPlaceholder` strings that repeat that TODO; they are not statute citations.
 
 Identity remains blocked on IdP registration, official scopes, threat-model, and legal review. This baseline does not unblock OIDC, biometrics, HealthKit, Health Connect, NFC, or backend clients.

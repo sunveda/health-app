@@ -73,6 +73,9 @@ struct SettingsView: View {
                         Text(displayLabel(for: dependencies.consentStore.status))
                             .foregroundStyle(.secondary)
                     }
+                    Text(PrivacyCopyPlaceholder.consentStoreNotConfigured)
+                        .font(.footnote)
+                        .foregroundStyle(.secondary)
                     LabeledContent("Crash reporting") {
                         Text(displayLabel(for: dependencies.crashReporter.status))
                             .foregroundStyle(.secondary)
@@ -81,7 +84,13 @@ struct SettingsView: View {
                         Text(displayLabel(for: dependencies.telemetryPolicy.status))
                             .foregroundStyle(.secondary)
                     }
+                    Text(PrivacyCopyPlaceholder.crashAndTelemetryDisabled)
+                        .font(.footnote)
+                        .foregroundStyle(.secondary)
                     Label("Data export and deletion", systemImage: "arrow.down.doc")
+                    Text(PrivacyCopyPlaceholder.legalReviewTodo)
+                        .font(.footnote)
+                        .foregroundStyle(.secondary)
                 }
 
                 Section("Account") {

@@ -94,3 +94,15 @@ object LogRedaction {
 
     fun isForbiddenInLogs(field: SensitiveField): Boolean = true
 }
+
+/** Settings placeholders tied to ConsentStore stubs. Not legal notices. */
+object PrivacyCopyPlaceholder {
+    const val LEGAL_REVIEW_TODO =
+        "TODO(product/legal): privacy notices, consent withdrawal, and retention copy are not approved."
+
+    const val CONSENT_STORE_NOT_CONFIGURED =
+        "Consent recording is not configured. Engineering purpose summaries are not official notices."
+
+    const val CRASH_AND_TELEMETRY_DISABLED =
+        "Crash reporting and telemetry are not configured and do not send events."
+}

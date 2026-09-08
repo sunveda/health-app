@@ -11,6 +11,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.sunveda.healthapp.platform.PlatformDependencies
+import com.sunveda.healthapp.platform.PrivacyCopyPlaceholder
 import com.sunveda.healthapp.platform.toDisplayLabel
 
 @Composable
@@ -74,6 +75,11 @@ fun SettingsScreen(dependencies: PlatformDependencies, modifier: Modifier = Modi
             style = MaterialTheme.typography.bodyMedium,
         )
         Text(
+            text = PrivacyCopyPlaceholder.CONSENT_STORE_NOT_CONFIGURED,
+            modifier = Modifier.padding(top = 4.dp),
+            style = MaterialTheme.typography.bodySmall,
+        )
+        Text(
             text = "Crash reporting: ${dependencies.crashReporter.status.toDisplayLabel()}",
             modifier = Modifier.padding(top = 4.dp),
             style = MaterialTheme.typography.bodyMedium,
@@ -82,6 +88,16 @@ fun SettingsScreen(dependencies: PlatformDependencies, modifier: Modifier = Modi
             text = "Telemetry: ${dependencies.telemetryPolicy.status.toDisplayLabel()}",
             modifier = Modifier.padding(top = 4.dp),
             style = MaterialTheme.typography.bodyMedium,
+        )
+        Text(
+            text = PrivacyCopyPlaceholder.CRASH_AND_TELEMETRY_DISABLED,
+            modifier = Modifier.padding(top = 4.dp),
+            style = MaterialTheme.typography.bodySmall,
+        )
+        Text(
+            text = PrivacyCopyPlaceholder.LEGAL_REVIEW_TODO,
+            modifier = Modifier.padding(top = 8.dp),
+            style = MaterialTheme.typography.bodySmall,
         )
     }
 }

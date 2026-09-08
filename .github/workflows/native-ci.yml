@@ -29,15 +29,24 @@ jobs:
           import json
           from pathlib import Path
 
-          for path in Path("packages/contracts").rglob("*.json"):
-              json.loads(path.read_text(encoding="utf-8"))
-              print(f"Validated {path}")
+          for directory in ("packages/contracts", "packages/domain"):
+              for path in Path(directory).rglob("*.json"):
+                  json.loads(path.read_text(encoding="utf-8"))
+                  print(f"Validated {path}")
           PY
           git diff --check
 
       - name: Reject forbidden patterns
         shell: bash
         run: python3 scripts/check-forbidden-patterns.py
+
+      - name: Run domain eligibility tests
+        shell: bash
+        run: python3 -m unittest discover -s packages/domain -t packages/domain -p 'test_*.py'
+
+      - name: Test iOS simulator destination resolver
+        shell: bash
+        run: python3 -m unittest discover -s scripts -t scripts -p 'test_ios_simulator_destination.py'
 
   android:
     name: Android build and test
@@ -95,10 +104,14 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
+          # Prefer iPhone 15; fall back to another available iPhone by UDID.
+          # Do not use generic/platform=iOS Simulator — that cannot run tests.
+          DESTINATION="$(python3 ../../scripts/ios_simulator_destination.py)"
+          echo "Using xcodebuild destination: ${DESTINATION}"
           xcodebuild \
             -project HealthApp.xcodeproj \
             -scheme HealthApp \
             -sdk iphonesimulator \
-            -destination 'platform=iOS Simulator,name=iPhone 15' \
+            -destination "${DESTINATION}" \
             CODE_SIGNING_ALLOWED=NO \
             test
