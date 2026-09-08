@@ -22,8 +22,32 @@ interface BiometricUnlock {
     fun unlock(): CapabilityOutcome<Unit>
 }
 
+/** Device-health adapter. Stubs must not call Health Connect; they expose availability, permission, scope, and failure only. */
 interface HealthDataSource {
     val status: CapabilityStatus
+    val permissionState: HealthPermissionState
+    val grantedReadScopes: Set<WellnessReadScope>
+    val lastFailure: CapabilityStatus?
+
+    /** Never prompts the system on stubs; returns not configured / unavailable. */
+    fun requestReadAccess(scopes: Set<WellnessReadScope>): CapabilityOutcome<Unit>
+
+    fun capabilitySnapshot(): WellnessCapabilitySnapshot =
+        WellnessCapabilitySnapshot(
+            availability = status,
+            permissionState = permissionState,
+            grantedReadScopes = grantedReadScopes,
+            lastFailure = lastFailure,
+        )
+}
+
+/** Feature-facing wellness sync. Screens depend on this instead of importing device kits. */
+interface WellnessSyncClient {
+    val featureFlag: WellnessFeatureFlag
+    val status: CapabilityStatus
+    val lastSyncedAt: java.time.Instant?
+
+    fun sync(): CapabilityOutcome<Unit>
 }
 
 interface NfcCapability {

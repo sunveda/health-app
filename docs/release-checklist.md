@@ -4,7 +4,7 @@ Prerequisites for TestFlight and Play internal testing. This is a delivery check
 
 Account emails, Apple Team IDs, Play developer account names, and signing-certificate fingerprints are **TBD with the product owner** and must not be invented or committed here.
 
-Related: [`architecture.md`](architecture.md) (signing placeholders), [`security.md`](security.md), [`privacy-baseline.md`](privacy-baseline.md).
+Related: [`architecture.md`](architecture.md) (signing placeholders), [`security.md`](security.md), [`privacy-baseline.md`](privacy-baseline.md), [`wellness-baseline.md`](wellness-baseline.md).
 
 ## Bundle / application ID freeze
 

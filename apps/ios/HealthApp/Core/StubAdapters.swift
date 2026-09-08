@@ -76,10 +76,44 @@ struct UnavailableBiometricUnlock: BiometricUnlock {
 
 struct NotConfiguredHealthDataSource: HealthDataSource {
     let status = CapabilityStatus.notConfigured
+    let permissionState = HealthPermissionState.notConfigured
+    let grantedReadScopes: Set<WellnessReadScope> = []
+    let lastFailure: CapabilityError? = .notConfigured
+
+    func requestReadAccess(scopes _: Set<WellnessReadScope>) -> Result<Void, CapabilityError> {
+        .failure(.notConfigured)
+    }
 }
 
 struct UnavailableHealthDataSource: HealthDataSource {
     let status = CapabilityStatus.unavailable
+    let permissionState = HealthPermissionState.unavailable
+    let grantedReadScopes: Set<WellnessReadScope> = []
+    let lastFailure: CapabilityError? = .unavailable
+
+    func requestReadAccess(scopes _: Set<WellnessReadScope>) -> Result<Void, CapabilityError> {
+        .failure(.unavailable)
+    }
+}
+
+struct NotConfiguredWellnessSyncClient: WellnessSyncClient {
+    let featureFlag = WellnessFeatureFlag.disabled
+    let status = CapabilityStatus.notConfigured
+    let lastSyncedAt: Date? = nil
+
+    func sync() -> Result<Void, CapabilityError> {
+        .failure(.notConfigured)
+    }
+}
+
+struct UnavailableWellnessSyncClient: WellnessSyncClient {
+    let featureFlag = WellnessFeatureFlag.disabled
+    let status = CapabilityStatus.unavailable
+    let lastSyncedAt: Date? = nil
+
+    func sync() -> Result<Void, CapabilityError> {
+        .failure(.unavailable)
+    }
 }
 
 struct NotConfiguredNfcCapability: NfcCapability {

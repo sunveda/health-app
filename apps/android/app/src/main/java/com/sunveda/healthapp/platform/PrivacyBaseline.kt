@@ -77,6 +77,7 @@ enum class SensitiveField(val logKey: String) {
     POSTAL_ADDRESS("postalAddress"),
     FINANCIAL_ACCOUNT("financialAccount"),
     BIOMETRIC_TEMPLATE("biometricTemplate"),
+    HEALTH_SAMPLE("healthSample"),
 }
 
 object LogRedaction {

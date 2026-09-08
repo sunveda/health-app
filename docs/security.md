@@ -35,6 +35,8 @@ The product team must document the lawful basis and purpose for each data catego
 
 Classification, on-device vs later-sync principles, logging redaction, the crash-reporting **not configured** decision, and consent/purpose scaffolding are in [`privacy-baseline.md`](privacy-baseline.md). Lawful basis and user-facing legal copy remain TODO for product/legal. TestFlight / Play internal-track prerequisites (no in-repo certs; signing ownership TBD) are in [`release-checklist.md`](release-checklist.md).
 
+Wellness device-health adapters remain **NotConfigured**: no HealthKit or Health Connect permission requests or reads. Intended later scopes and the feature-flag approach are in [`wellness-baseline.md`](wellness-baseline.md). That note does not complete the Wellness delivery stage.
+
 ## Development safeguards
 
 Pull requests should include a data-classification note for new fields, tests for authorization and redaction, dependency review, and a statement about whether a new native permission is introduced. CI should scan for secrets and prohibited sample data. Fixtures must use synthetic values that cannot be mistaken for real identity or medical records.

@@ -24,14 +24,14 @@ The clients are native apps in a single monorepo: SwiftUI on iOS and Kotlin/Jetp
 apps/ios/
   HealthApp/
     App/                # SwiftUI entry; constructs the composition root once
-    Core/               # Platform protocols, NotConfigured/Unavailable stubs, composition root, privacy helpers
+    Core/               # Platform protocols, NotConfigured/Unavailable stubs, composition root, privacy and wellness helpers
     Features/           # Tab shells (home, health, expenses, settings)
   HealthAppTests/       # Unit tests of mapping helpers and adapter stubs
 apps/android/
   app/src/main/java/com/sunveda/healthapp/
     MainActivity.kt     # Compose entry; constructs the composition root once
     core/               # UI theme only
-    platform/           # Platform interfaces, NotConfigured/Unavailable stubs, composition root, privacy helpers
+    platform/           # Platform interfaces, NotConfigured/Unavailable stubs, composition root, privacy and wellness helpers
     features/           # Tab shells (home, health, expenses, settings)
   app/src/test/         # JVM unit tests of mapping helpers and adapter stubs
 packages/contracts/     # Live JSON Schemas shared by both clients
@@ -41,7 +41,7 @@ packages/api/           # Reserved — no networking clients yet
 
 A platform adapter must expose capability availability, permission state, read scope, and failure state. Screens and feature modules must never import or call HealthKit, Health Connect, NFC, biometrics, or secure-storage APIs directly. Capability access is only through Core/platform adapters constructed by a single composition root. This keeps platform-specific behavior testable and prevents accidental permission escalation.
 
-Today those adapters are NotConfigured (and Unavailable) stubs: they return explicit unavailable states and do not request permissions or touch device kits. Stage 1.5 adds the same pattern for `ConsentStore`, `CrashReporter`, and `TelemetryPolicy` (no persistence of sensitive consent payloads, no crash SDK, no telemetry send). Real HealthKit, Health Connect, Keychain, Keystore, LocalAuthentication, BiometricPrompt, and CoreNFC implementations may be added later only inside the Core/platform adapter paths, and only the composition root may construct them. CI greps for concrete `NotConfigured*` / `Unavailable*` / `InMemory*` constructors outside `CompositionRoot` and unit tests.
+Today those adapters are NotConfigured (and Unavailable) stubs: they return explicit unavailable states and do not request permissions or touch device kits. Stage 1.5 adds the same pattern for `ConsentStore`, `CrashReporter`, and `TelemetryPolicy` (no persistence of sensitive consent payloads, no crash SDK, no telemetry send). Wellness deepens `HealthDataSource` (availability, permission state, read scope, failure) and adds `WellnessSyncClient` behind a disabled feature flag — still NotConfigured, still no HealthKit or Health Connect calls. Real HealthKit, Health Connect, Keychain, Keystore, LocalAuthentication, BiometricPrompt, and CoreNFC implementations may be added later only inside the Core/platform adapter paths, and only the composition root may construct them. CI greps for concrete `NotConfigured*` / `Unavailable*` / `InMemory*` constructors outside `CompositionRoot` and unit tests.
 
 ## Signing & release placeholders
 
@@ -72,10 +72,12 @@ Data acquisition, normalization, storage, AI processing, export, and deletion mu
 | Foundation | Monorepo, typed contracts, navigation shell, security policy | CI passes; no secrets committed |
 | Security/privacy baseline | Data classification, device-boundary note, PII-safe logging, consent/purpose scaffolding, crash-reporting decision | Data-classification and device-boundary note published; PII-safe logging policy; consent/purpose scaffolding interfaces present; crash-reporting decision recorded |
 | Identity | OIDC/PKCE handoff and local biometric unlock | Threat model and provider integration review complete |
-| Wellness | HealthKit and Health Connect read adapters | Permission minimization and platform tests pass |
+| Wellness | Minimized HealthKit / Health Connect read adapters behind CompositionRoot and a feature flag | Smallest necessary read scopes with purpose-tied permission UX; adapters constructed only by CompositionRoot; feature flag off until kit wiring is reviewed; platform tests cover not-configured, unavailable, denied, and ready paths |
 | Clinical | Secure report upload and review flow | File validation, redaction, and deletion tested |
 | Expenses | Expense import, calculation, and export preview | Calculation fixtures and user confirmation flow pass |
 | AI insights | Grounded summaries and trend views | Safety review, provenance display, and fallback states pass |
 | Production hardening | Cloud controls, monitoring, incident response | Independent security and privacy review complete |
 
 Classification, device-boundary principles, logging redaction, consent scaffolding, and the crash-reporting decision are in [`privacy-baseline.md`](privacy-baseline.md). That stage does not add backend URLs or unblock Identity.
+
+Wellness intended read scopes, deferred kit wiring, and the feature-flag approach are in [`wellness-baseline.md`](wellness-baseline.md). Current clients ship NotConfigured wellness stubs only; that does not complete Wellness, Identity, or Clinical.

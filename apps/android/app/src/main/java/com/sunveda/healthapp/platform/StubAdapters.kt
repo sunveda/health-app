@@ -62,10 +62,38 @@ class UnavailableBiometricUnlock : BiometricUnlock {
 
 class NotConfiguredHealthDataSource : HealthDataSource {
     override val status = CapabilityStatus.NOT_CONFIGURED
+    override val permissionState = HealthPermissionState.NOT_CONFIGURED
+    override val grantedReadScopes: Set<WellnessReadScope> = emptySet()
+    override val lastFailure: CapabilityStatus? = CapabilityStatus.NOT_CONFIGURED
+
+    override fun requestReadAccess(scopes: Set<WellnessReadScope>) =
+        CapabilityOutcome.Unavailable(CapabilityStatus.NOT_CONFIGURED)
 }
 
 class UnavailableHealthDataSource : HealthDataSource {
     override val status = CapabilityStatus.UNAVAILABLE
+    override val permissionState = HealthPermissionState.UNAVAILABLE
+    override val grantedReadScopes: Set<WellnessReadScope> = emptySet()
+    override val lastFailure: CapabilityStatus? = CapabilityStatus.UNAVAILABLE
+
+    override fun requestReadAccess(scopes: Set<WellnessReadScope>) =
+        CapabilityOutcome.Unavailable(CapabilityStatus.UNAVAILABLE)
+}
+
+class NotConfiguredWellnessSyncClient : WellnessSyncClient {
+    override val featureFlag = WellnessFeatureFlag.DISABLED
+    override val status = CapabilityStatus.NOT_CONFIGURED
+    override val lastSyncedAt: java.time.Instant? = null
+
+    override fun sync() = CapabilityOutcome.Unavailable(CapabilityStatus.NOT_CONFIGURED)
+}
+
+class UnavailableWellnessSyncClient : WellnessSyncClient {
+    override val featureFlag = WellnessFeatureFlag.DISABLED
+    override val status = CapabilityStatus.UNAVAILABLE
+    override val lastSyncedAt: java.time.Instant? = null
+
+    override fun sync() = CapabilityOutcome.Unavailable(CapabilityStatus.UNAVAILABLE)
 }
 
 class NotConfiguredNfcCapability : NfcCapability {

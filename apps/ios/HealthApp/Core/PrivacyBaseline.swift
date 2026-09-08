@@ -79,6 +79,7 @@ enum SensitiveField: String, CaseIterable, Equatable {
     case postalAddress
     case financialAccount
     case biometricTemplate
+    case healthSample
 }
 
 enum LogRedaction {
