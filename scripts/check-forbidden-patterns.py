@@ -15,6 +15,11 @@ ADAPTER_ALLOWLIST_PREFIXES = (
     "apps/android/app/src/main/java/com/sunveda/healthapp/platform/",
 )
 
+CONSTRUCTOR_ALLOWED_PATHS = (
+    "apps/ios/HealthApp/Core/CompositionRoot.swift",
+    "apps/android/app/src/main/java/com/sunveda/healthapp/platform/CompositionRoot.kt",
+)
+
 CODE_SUFFIXES = (
     ".swift",
     ".kt",
@@ -50,6 +55,15 @@ KIT_PATTERNS = (
         re.compile(r"(?m)^\s*import LocalAuthentication\b|\bLAContext\b"),
     ),
     (
+        "Security/Keychain import/usage",
+        re.compile(
+            r"(?m)^\s*import Security\b|"
+            r"\bSecItem(?:Add|CopyMatching|Update|Delete)?\b|"
+            r"\bSecAccessControl\w*|"
+            r"\bkSec(?:Class|ValueData|AttrAccessible)\w*"
+        ),
+    ),
+    (
         "Health Connect import/usage",
         re.compile(r"androidx\.health\.connect\b|\bHealthConnectClient\b"),
     ),
@@ -65,6 +79,10 @@ KIT_PATTERNS = (
         "Android NFC API usage",
         re.compile(r"(?m)^\s*import android\.nfc\b|\bNfcAdapter\b"),
     ),
+)
+
+ADAPTER_CONSTRUCTOR = re.compile(
+    r"\b(?:NotConfigured|Unavailable|InMemory)[A-Za-z0-9]+\s*\("
 )
 
 
@@ -84,6 +102,20 @@ def is_skipped(path: str) -> bool:
 
 def is_adapter_path(path: str) -> bool:
     return path.startswith(ADAPTER_ALLOWLIST_PREFIXES)
+
+
+def is_unit_test_path(path: str) -> bool:
+    return (
+        path.startswith("apps/ios/HealthAppTests/")
+        or "/src/test/" in path
+        or path.endswith("Tests.swift")
+        or path.endswith("Test.kt")
+        or path.endswith("Tests.kt")
+    )
+
+
+def is_constructor_allowed(path: str) -> bool:
+    return path in CONSTRUCTOR_ALLOWED_PATHS or is_unit_test_path(path)
 
 
 def read_text(path: str) -> str | None:
@@ -121,12 +153,19 @@ def main() -> int:
                 line = text.count("\n", 0, match.start()) + 1
                 violations.append(f"{path}:{line}: obvious token material")
 
-        if path.endswith(CODE_SUFFIXES) and not is_adapter_path(path) and path != CHECKER_RELATIVE:
-            for label, pattern in KIT_PATTERNS:
-                for match in pattern.finditer(text):
+        if path.endswith(CODE_SUFFIXES) and path != CHECKER_RELATIVE:
+            if not is_adapter_path(path):
+                for label, pattern in KIT_PATTERNS:
+                    for match in pattern.finditer(text):
+                        line = text.count("\n", 0, match.start()) + 1
+                        violations.append(
+                            f"{path}:{line}: {label} outside Core/platform adapter allowlist"
+                        )
+            if not is_constructor_allowed(path):
+                for match in ADAPTER_CONSTRUCTOR.finditer(text):
                     line = text.count("\n", 0, match.start()) + 1
                     violations.append(
-                        f"{path}:{line}: {label} outside Core/platform adapter allowlist"
+                        f"{path}:{line}: concrete adapter constructed outside CompositionRoot"
                     )
 
     if violations:

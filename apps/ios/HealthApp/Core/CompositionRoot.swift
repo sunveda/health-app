@@ -7,6 +7,9 @@ struct AppDependencies {
     let healthDataSource: HealthDataSource
     let nfcCapability: NfcCapability
     let identitySession: IdentitySession
+    let consentStore: ConsentStore
+    let crashReporter: CrashReporter
+    let telemetryPolicy: TelemetryPolicy
 }
 
 /// Single composition root. The only type allowed to construct platform adapter implementations.
@@ -17,7 +20,10 @@ enum CompositionRoot {
             biometricUnlock: NotConfiguredBiometricUnlock(),
             healthDataSource: NotConfiguredHealthDataSource(),
             nfcCapability: NotConfiguredNfcCapability(),
-            identitySession: NotConfiguredIdentitySession()
+            identitySession: NotConfiguredIdentitySession(),
+            consentStore: NotConfiguredConsentStore(),
+            crashReporter: NotConfiguredCrashReporter(),
+            telemetryPolicy: NotConfiguredTelemetryPolicy()
         )
     }
 }

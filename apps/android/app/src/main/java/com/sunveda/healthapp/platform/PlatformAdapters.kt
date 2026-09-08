@@ -35,3 +35,22 @@ interface IdentitySession {
     val status: CapabilityStatus
     fun pairwiseSubject(): String?
 }
+
+/** Records category + granted/denied + purpose id only. No sensitive payloads. */
+interface ConsentStore {
+    val status: CapabilityStatus
+    fun decision(category: DataCategory): ConsentDecision
+    fun record(decision: ConsentDecision, category: DataCategory, purposeId: String): CapabilityOutcome<Unit>
+}
+
+/** Crash reporting is not configured; implementations must never send PII or a DSN-backed payload. */
+interface CrashReporter {
+    val status: CapabilityStatus
+    fun captureNonPII(event: String): CapabilityOutcome<Unit>
+}
+
+/** Telemetry allow/deny by data category. NotConfigured implementations deny every category. */
+interface TelemetryPolicy {
+    val status: CapabilityStatus
+    fun isAllowed(category: DataCategory): Boolean
+}

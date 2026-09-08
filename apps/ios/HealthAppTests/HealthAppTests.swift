@@ -19,6 +19,11 @@ final class HealthAppTests: XCTestCase {
         XCTAssertEqual(dependencies.nfcCapability.status, .notConfigured)
         XCTAssertEqual(dependencies.identitySession.status, .notConfigured)
         XCTAssertNil(dependencies.identitySession.pairwiseSubject())
+        XCTAssertEqual(dependencies.consentStore.status, .notConfigured)
+        XCTAssertEqual(dependencies.consentStore.decision(for: .healthMeasurements), .notRecorded)
+        XCTAssertEqual(dependencies.crashReporter.status, .notConfigured)
+        XCTAssertEqual(dependencies.telemetryPolicy.status, .notConfigured)
+        XCTAssertFalse(dependencies.telemetryPolicy.isAllowed(.telemetry))
     }
 
     func testSecureStoreStubsDistinguishLanesAndRejectReads() {
@@ -40,5 +45,101 @@ final class HealthAppTests: XCTestCase {
         let dependencies = CompositionRoot.make()
         _ = RootView(dependencies: dependencies)
         XCTAssertEqual(displayLabel(for: dependencies.healthDataSource.status), "Not configured")
+        XCTAssertEqual(displayLabel(for: dependencies.consentStore.status), "Not configured")
+        XCTAssertEqual(displayLabel(for: dependencies.crashReporter.status), "Not configured")
+    }
+
+    func testPurposeRegistryCoversEveryDataCategoryOnce() {
+        let categories = Set(PurposeRegistry.all.map(\.category))
+        XCTAssertEqual(categories, Set(DataCategory.allCases))
+        XCTAssertEqual(PurposeRegistry.all.count, DataCategory.allCases.count)
+
+        let ids = PurposeRegistry.all.map(\.id)
+        XCTAssertEqual(Set(ids).count, ids.count)
+
+        for category in DataCategory.allCases {
+            XCTAssertEqual(PurposeRegistry.purposes(for: category).count, 1)
+        }
+
+        XCTAssertEqual(
+            PurposeRegistry.definition(id: "purpose.identity.individual-number-review")?.category,
+            .individualNumber
+        )
+        XCTAssertNil(PurposeRegistry.definition(id: "purpose.does-not-exist"))
+    }
+
+    func testLogRedactionNeverInterpolatesSensitiveValues() {
+        let leakedNumber = "123456789012"
+        let leakedToken = "supersecrettokenvalue"
+        let message = LogRedaction.sanitize(
+            event: "session-start",
+            fields: [
+                .individualNumber: leakedNumber,
+                .accessToken: leakedToken,
+                .diagnosis: "synthetic-diagnosis-label",
+            ]
+        )
+
+        XCTAssertTrue(message.hasPrefix("event=session-start"))
+        XCTAssertFalse(message.contains(leakedNumber))
+        XCTAssertFalse(message.contains(leakedToken))
+        XCTAssertFalse(message.contains("synthetic-diagnosis-label"))
+        XCTAssertTrue(message.contains(LogRedaction.replacement(for: .individualNumber)))
+        XCTAssertTrue(message.contains(LogRedaction.replacement(for: .accessToken)))
+        XCTAssertEqual(LogRedaction.sanitize(event: "noop", fields: [:]), "event=noop")
+
+        for field in SensitiveField.allCases {
+            XCTAssertTrue(LogRedaction.isForbiddenInLogs(field))
+        }
+    }
+
+    func testNotConfiguredPrivacyAdaptersRejectWritesAndDenyTelemetry() {
+        let consent = NotConfiguredConsentStore()
+        XCTAssertEqual(consent.status, .notConfigured)
+        XCTAssertEqual(consent.decision(for: .clinicalDocuments), .notRecorded)
+        XCTAssertEqual(
+            consent.record(decision: .granted, for: .clinicalDocuments, purposeId: "purpose.clinical.document-review"),
+            .failure(.notConfigured)
+        )
+
+        let crash = NotConfiguredCrashReporter()
+        XCTAssertEqual(crash.status, .notConfigured)
+        XCTAssertEqual(crash.captureNonPII(event: "launch"), .failure(.notConfigured))
+
+        let telemetry = NotConfiguredTelemetryPolicy()
+        XCTAssertEqual(telemetry.status, .notConfigured)
+        for category in DataCategory.allCases {
+            XCTAssertFalse(telemetry.isAllowed(category))
+        }
+    }
+
+    func testInMemoryConsentStoreRecordsGrantedAndDeniedWithoutPayloads() {
+        let store = InMemoryConsentStore()
+        XCTAssertEqual(store.status, .ready)
+        XCTAssertEqual(store.decision(for: .expenses), .notRecorded)
+
+        let granted = store.record(
+            decision: .granted,
+            for: .expenses,
+            purposeId: "purpose.expenses.export-preview"
+        )
+        XCTAssertEqual(granted, .success(()))
+        XCTAssertEqual(store.decision(for: .expenses), .granted)
+
+        let denied = store.record(
+            decision: .denied,
+            for: .healthMeasurements,
+            purposeId: "purpose.health.measurements-display"
+        )
+        XCTAssertEqual(denied, .success(()))
+        XCTAssertEqual(store.decision(for: .healthMeasurements), .denied)
+
+        let mismatchedPurpose = store.record(
+            decision: .granted,
+            for: .telemetry,
+            purposeId: "purpose.expenses.export-preview"
+        )
+        XCTAssertEqual(mismatchedPurpose, .failure(.unavailable))
+        XCTAssertEqual(store.decision(for: .telemetry), .notRecorded)
     }
 }

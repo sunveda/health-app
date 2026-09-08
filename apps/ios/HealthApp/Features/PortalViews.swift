@@ -69,6 +69,18 @@ struct SettingsView: View {
             List {
                 Section("Privacy") {
                     Label("Consent and connected sources", systemImage: "checkmark.shield")
+                    LabeledContent("Consent store") {
+                        Text(displayLabel(for: dependencies.consentStore.status))
+                            .foregroundStyle(.secondary)
+                    }
+                    LabeledContent("Crash reporting") {
+                        Text(displayLabel(for: dependencies.crashReporter.status))
+                            .foregroundStyle(.secondary)
+                    }
+                    LabeledContent("Telemetry") {
+                        Text(displayLabel(for: dependencies.telemetryPolicy.status))
+                            .foregroundStyle(.secondary)
+                    }
                     Label("Data export and deletion", systemImage: "arrow.down.doc")
                 }
 
