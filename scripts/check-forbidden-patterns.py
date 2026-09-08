@@ -1,0 +1,143 @@
+#!/usr/bin/env python3
+"""Fail CI when Expo leftovers, secrets, or device-kit APIs leak outside Core/platform adapters."""
+
+from __future__ import annotations
+
+import re
+import subprocess
+import sys
+from pathlib import Path
+
+ROOT = Path(__file__).resolve().parents[1]
+
+ADAPTER_ALLOWLIST_PREFIXES = (
+    "apps/ios/HealthApp/Core/",
+    "apps/android/app/src/main/java/com/sunveda/healthapp/platform/",
+)
+
+CODE_SUFFIXES = (
+    ".swift",
+    ".kt",
+    ".kts",
+    ".java",
+    ".m",
+    ".mm",
+    ".h",
+    ".gradle",
+)
+
+SKIP_PATH_PREFIXES = (
+    ".git/",
+)
+
+CHECKER_RELATIVE = "scripts/check-forbidden-patterns.py"
+
+EXPO_PUBLIC = re.compile(r"EXPO_PUBLIC_")
+PEM_HEADER = re.compile(r"-----BEGIN (?:[A-Z0-9]+ )?PRIVATE KEY-----")
+TOKEN_ASSIGNMENT = re.compile(
+    r"(?i)(?:api[_-]?key|auth[_-]?token|access[_-]?token|refresh[_-]?token|"
+    r"secret[_-]?key|client[_-]?secret|private[_-]?key)\s*[:=]\s*['\"][^'\"]{12,}['\"]"
+)
+OBVIOUS_TOKEN = re.compile(
+    r"(?:sk_live_|sk_test_|ghp_[A-Za-z0-9]{20,}|github_pat_[A-Za-z0-9_]{20,}|Bearer eyJ)"
+)
+
+KIT_PATTERNS = (
+    ("HealthKit import/usage", re.compile(r"(?m)^\s*import HealthKit\b|\bHKHealthStore\b")),
+    ("CoreNFC import/usage", re.compile(r"(?m)^\s*import CoreNFC\b|\bNFCTagReaderSession\b|\bNFCNDEFReaderSession\b")),
+    (
+        "LocalAuthentication import/usage",
+        re.compile(r"(?m)^\s*import LocalAuthentication\b|\bLAContext\b"),
+    ),
+    (
+        "Health Connect import/usage",
+        re.compile(r"androidx\.health\.connect\b|\bHealthConnectClient\b"),
+    ),
+    (
+        "BiometricPrompt import/usage",
+        re.compile(r"androidx\.biometric\b|\bBiometricPrompt\b"),
+    ),
+    (
+        "Android Keystore API usage",
+        re.compile(r"AndroidKeyStore\b|android\.security\.keystore\b"),
+    ),
+    (
+        "Android NFC API usage",
+        re.compile(r"(?m)^\s*import android\.nfc\b|\bNfcAdapter\b"),
+    ),
+)
+
+
+def tracked_files() -> list[str]:
+    result = subprocess.run(
+        ["git", "ls-files", "-z"],
+        cwd=ROOT,
+        check=True,
+        capture_output=True,
+    )
+    return [path for path in result.stdout.decode("utf-8").split("\0") if path]
+
+
+def is_skipped(path: str) -> bool:
+    return path.startswith(SKIP_PATH_PREFIXES)
+
+
+def is_adapter_path(path: str) -> bool:
+    return path.startswith(ADAPTER_ALLOWLIST_PREFIXES)
+
+
+def read_text(path: str) -> str | None:
+    full = ROOT / path
+    try:
+        return full.read_text(encoding="utf-8")
+    except (UnicodeDecodeError, FileNotFoundError, IsADirectoryError):
+        return None
+
+
+def main() -> int:
+    violations: list[str] = []
+
+    for path in tracked_files():
+        if is_skipped(path):
+            continue
+        text = read_text(path)
+        if text is None:
+            continue
+
+        if path != CHECKER_RELATIVE:
+            for match in EXPO_PUBLIC.finditer(text):
+                line = text.count("\n", 0, match.start()) + 1
+                violations.append(f"{path}:{line}: forbidden Expo public env prefix EXPO_PUBLIC_")
+
+        for match in PEM_HEADER.finditer(text):
+            line = text.count("\n", 0, match.start()) + 1
+            violations.append(f"{path}:{line}: private key PEM header")
+
+        if path != CHECKER_RELATIVE:
+            for match in TOKEN_ASSIGNMENT.finditer(text):
+                line = text.count("\n", 0, match.start()) + 1
+                violations.append(f"{path}:{line}: obvious secret assignment")
+            for match in OBVIOUS_TOKEN.finditer(text):
+                line = text.count("\n", 0, match.start()) + 1
+                violations.append(f"{path}:{line}: obvious token material")
+
+        if path.endswith(CODE_SUFFIXES) and not is_adapter_path(path) and path != CHECKER_RELATIVE:
+            for label, pattern in KIT_PATTERNS:
+                for match in pattern.finditer(text):
+                    line = text.count("\n", 0, match.start()) + 1
+                    violations.append(
+                        f"{path}:{line}: {label} outside Core/platform adapter allowlist"
+                    )
+
+    if violations:
+        print("Forbidden-pattern gate failed:", file=sys.stderr)
+        for item in violations:
+            print(f"  {item}", file=sys.stderr)
+        return 1
+
+    print("Forbidden-pattern gate passed.")
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())

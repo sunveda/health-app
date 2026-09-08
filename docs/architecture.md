@@ -18,24 +18,36 @@ This document turns the initial product specification into a staged architecture
 
 ## Mobile application structure
 
-The planned client uses a feature-oriented structure rather than placing business logic directly in screens:
+The clients are native apps in a single monorepo: SwiftUI on iOS and Kotlin/Jetpack Compose on Android. There is no Expo or Expo Router app. Shared product contracts live in `packages/contracts`. `packages/domain` and `packages/api` are reserved (README-only) until calculation engines and transport clients are designed.
 
 ```text
-apps/mobile/
-  app/                  # Expo Router routes and layouts
-  src/features/
-    identity/           # OIDC handoff, passkeys, biometric unlock
-    health/             # HealthKit and Health Connect adapters
-    clinical/           # Reports, uploads, summaries, trends
-    expenses/           # Medical expenses and deduction workflow
-    settings/           # Consent, privacy, account, and data export
-  src/platform/         # iOS/Android capability adapters
-  src/lib/              # API client, secure storage, telemetry policy
-packages/domain/        # Shared entities, schemas, and pure calculations
-packages/api/           # Versioned request/response contracts
+apps/ios/
+  HealthApp/
+    App/                # SwiftUI entry; constructs the composition root once
+    Core/               # Platform protocols, NotConfigured/Unavailable stubs, composition root
+    Features/           # Tab shells (home, health, expenses, settings)
+  HealthAppTests/       # Unit tests of mapping helpers and adapter stubs
+apps/android/
+  app/src/main/java/com/sunveda/healthapp/
+    MainActivity.kt     # Compose entry; constructs the composition root once
+    core/               # UI theme only
+    platform/           # Platform interfaces, NotConfigured/Unavailable stubs, composition root
+    features/           # Tab shells (home, health, expenses, settings)
+  app/src/test/         # JVM unit tests of mapping helpers and adapter stubs
+packages/contracts/     # Live JSON Schemas shared by both clients
+packages/domain/        # Reserved — no calculation engines yet
+packages/api/           # Reserved — no networking clients yet
 ```
 
-A platform adapter must expose capability availability, permission state, read scope, and failure state. Screens should never call HealthKit, Health Connect, NFC, biometrics, or secure storage APIs directly. This keeps platform-specific behavior testable and prevents accidental permission escalation.
+A platform adapter must expose capability availability, permission state, read scope, and failure state. Screens and feature modules must never import or call HealthKit, Health Connect, NFC, biometrics, or secure-storage APIs directly. Capability access is only through Core/platform adapters constructed by a single composition root. This keeps platform-specific behavior testable and prevents accidental permission escalation.
+
+Today those adapters are NotConfigured (and Unavailable) stubs: they return explicit unavailable states and do not request permissions or touch device kits. Real HealthKit, Health Connect, Keychain, Keystore, LocalAuthentication, BiometricPrompt, and CoreNFC implementations may be added later only inside the Core/platform adapter paths, and only the composition root may construct them.
+
+## Signing & release placeholders
+
+Both clients use the placeholder bundle / application ID `com.sunveda.healthapp`. Production signing certificates, provisioning profiles, upload keystores, and API credentials are not stored in this repository. Native CI builds iOS with `CODE_SIGNING_ALLOWED=NO`.
+
+Apple Developer Program membership, App Store Connect / TestFlight, Google Play Console ownership, Play App Signing, and a Play internal testing track are required before the Clinical stage. Account ownership and team emails are TBD with the product owner and are not recorded here.
 
 ## Backend target
 
