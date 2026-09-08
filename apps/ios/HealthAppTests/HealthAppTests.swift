@@ -97,14 +97,14 @@ final class HealthAppTests: XCTestCase {
         let consent = NotConfiguredConsentStore()
         XCTAssertEqual(consent.status, .notConfigured)
         XCTAssertEqual(consent.decision(for: .clinicalDocuments), .notRecorded)
-        XCTAssertEqual(
+        assertFailure(
             consent.record(decision: .granted, for: .clinicalDocuments, purposeId: "purpose.clinical.document-review"),
-            .failure(.notConfigured)
+            .notConfigured
         )
 
         let crash = NotConfiguredCrashReporter()
         XCTAssertEqual(crash.status, .notConfigured)
-        XCTAssertEqual(crash.captureNonPII(event: "launch"), .failure(.notConfigured))
+        assertFailure(crash.captureNonPII(event: "launch"), .notConfigured)
 
         let telemetry = NotConfiguredTelemetryPolicy()
         XCTAssertEqual(telemetry.status, .notConfigured)
@@ -118,28 +118,58 @@ final class HealthAppTests: XCTestCase {
         XCTAssertEqual(store.status, .ready)
         XCTAssertEqual(store.decision(for: .expenses), .notRecorded)
 
-        let granted = store.record(
-            decision: .granted,
-            for: .expenses,
-            purposeId: "purpose.expenses.export-preview"
+        assertSuccess(
+            store.record(
+                decision: .granted,
+                for: .expenses,
+                purposeId: "purpose.expenses.export-preview"
+            )
         )
-        XCTAssertEqual(granted, .success(()))
         XCTAssertEqual(store.decision(for: .expenses), .granted)
 
-        let denied = store.record(
-            decision: .denied,
-            for: .healthMeasurements,
-            purposeId: "purpose.health.measurements-display"
+        assertSuccess(
+            store.record(
+                decision: .denied,
+                for: .healthMeasurements,
+                purposeId: "purpose.health.measurements-display"
+            )
         )
-        XCTAssertEqual(denied, .success(()))
         XCTAssertEqual(store.decision(for: .healthMeasurements), .denied)
 
-        let mismatchedPurpose = store.record(
-            decision: .granted,
-            for: .telemetry,
-            purposeId: "purpose.expenses.export-preview"
+        assertFailure(
+            store.record(
+                decision: .granted,
+                for: .telemetry,
+                purposeId: "purpose.expenses.export-preview"
+            ),
+            .unavailable
         )
-        XCTAssertEqual(mismatchedPurpose, .failure(.unavailable))
         XCTAssertEqual(store.decision(for: .telemetry), .notRecorded)
+    }
+}
+
+/// `Result<Void, _>` is not `Equatable` on the Swift 5.9 / Xcode 15 CI toolchain.
+private func assertSuccess(
+    _ result: Result<Void, CapabilityError>,
+    file: StaticString = #filePath,
+    line: UInt = #line
+) {
+    if case .success = result {
+        return
+    }
+    XCTFail("expected success, got \(String(describing: result))", file: file, line: line)
+}
+
+private func assertFailure(
+    _ result: Result<Void, CapabilityError>,
+    _ expected: CapabilityError,
+    file: StaticString = #filePath,
+    line: UInt = #line
+) {
+    switch result {
+    case .failure(let error):
+        XCTAssertEqual(error, expected, file: file, line: line)
+    case .success:
+        XCTFail("expected failure \(expected), got success", file: file, line: line)
     }
 }
