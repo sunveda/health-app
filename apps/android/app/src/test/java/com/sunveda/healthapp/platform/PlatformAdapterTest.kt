@@ -177,4 +177,21 @@ class PrivacyBaselineTest {
         )
         assertEquals(ConsentDecision.NOT_RECORDED, store.decision(DataCategory.TELEMETRY))
     }
+
+    @Test
+    fun privacyCopyPlaceholdersStayTodosWithoutLegalClaims() {
+        val copy = listOf(
+            PrivacyCopyPlaceholder.LEGAL_REVIEW_TODO,
+            PrivacyCopyPlaceholder.CONSENT_STORE_NOT_CONFIGURED,
+            PrivacyCopyPlaceholder.CRASH_AND_TELEMETRY_DISABLED,
+        )
+        copy.forEach { line ->
+            assertEquals(true, line.isNotBlank())
+        }
+        assertEquals(true, PrivacyCopyPlaceholder.LEGAL_REVIEW_TODO.contains("TODO(product/legal)"))
+        val joined = copy.joinToString(" ").lowercase()
+        assertEquals(false, joined.contains("個人情報保護法"))
+        assertEquals(false, joined.contains("番号法"))
+        assertEquals(false, joined.contains("appi"))
+    }
 }

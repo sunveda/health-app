@@ -103,3 +103,15 @@ enum LogRedaction {
         true
     }
 }
+
+/// Settings placeholders tied to ConsentStore stubs. Not legal notices.
+enum PrivacyCopyPlaceholder {
+    static let legalReviewTodo =
+        "TODO(product/legal): privacy notices, consent withdrawal, and retention copy are not approved."
+
+    static let consentStoreNotConfigured =
+        "Consent recording is not configured. Engineering purpose summaries are not official notices."
+
+    static let crashAndTelemetryDisabled =
+        "Crash reporting and telemetry are not configured and do not send events."
+}

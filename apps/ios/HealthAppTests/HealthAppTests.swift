@@ -146,6 +146,22 @@ final class HealthAppTests: XCTestCase {
         )
         XCTAssertEqual(store.decision(for: .telemetry), .notRecorded)
     }
+
+    func testPrivacyCopyPlaceholdersStayTodosWithoutLegalClaims() {
+        let copy = [
+            PrivacyCopyPlaceholder.legalReviewTodo,
+            PrivacyCopyPlaceholder.consentStoreNotConfigured,
+            PrivacyCopyPlaceholder.crashAndTelemetryDisabled,
+        ]
+        for line in copy {
+            XCTAssertFalse(line.isEmpty)
+        }
+        XCTAssertTrue(PrivacyCopyPlaceholder.legalReviewTodo.contains("TODO(product/legal)"))
+        let joined = copy.joined(separator: " ").lowercased()
+        XCTAssertFalse(joined.contains("個人情報保護法"))
+        XCTAssertFalse(joined.contains("番号法"))
+        XCTAssertFalse(joined.contains("appi"))
+    }
 }
 
 /// `Result<Void, _>` is not `Equatable` on the Swift 5.9 / Xcode 15 CI toolchain.

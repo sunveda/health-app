@@ -18,7 +18,7 @@ This document turns the initial product specification into a staged architecture
 
 ## Mobile application structure
 
-The clients are native apps in a single monorepo: SwiftUI on iOS and Kotlin/Jetpack Compose on Android. There is no Expo or Expo Router app. Shared product contracts live in `packages/contracts`. `packages/domain` and `packages/api` are reserved (README-only) until calculation engines and transport clients are designed.
+The clients are native apps in a single monorepo: SwiftUI on iOS and Kotlin/Jetpack Compose on Android. There is no Expo or Expo Router app. Shared product contracts live in `packages/contracts`. `packages/domain` holds synthetic medical-expense eligibility fixtures and a platform-neutral placeholder engine (not tax-law guidance; native apps do not import it at runtime). `packages/api` remains reserved (README-only) until transport clients are designed.
 
 ```text
 apps/ios/
@@ -35,7 +35,7 @@ apps/android/
     features/           # Tab shells (home, health, expenses, settings)
   app/src/test/         # JVM unit tests of mapping helpers and adapter stubs
 packages/contracts/     # Live JSON Schemas shared by both clients
-packages/domain/        # Reserved — no calculation engines yet
+packages/domain/        # Synthetic expense-eligibility fixtures + pure tests
 packages/api/           # Reserved — no networking clients yet
 ```
 
@@ -47,7 +47,7 @@ Today those adapters are NotConfigured (and Unavailable) stubs: they return expl
 
 Both clients use the placeholder bundle / application ID `com.sunveda.healthapp`. Production signing certificates, provisioning profiles, upload keystores, and API credentials are not stored in this repository. Native CI builds iOS with `CODE_SIGNING_ALLOWED=NO`.
 
-Apple Developer Program membership, App Store Connect / TestFlight, Google Play Console ownership, Play App Signing, and a Play internal testing track are required before the Clinical stage. Account ownership and team emails are TBD with the product owner and are not recorded here.
+Apple Developer Program membership, App Store Connect / TestFlight, Google Play Console ownership, Play App Signing, and a Play internal testing track are required before the Clinical stage. Account ownership and team emails are TBD with the product owner and are not recorded here. The operational checklist is [`release-checklist.md`](release-checklist.md).
 
 ## Backend target
 

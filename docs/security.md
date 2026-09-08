@@ -33,7 +33,7 @@ The product team must document the lawful basis and purpose for each data catego
 
 ## Stage 1.5 baseline
 
-Classification, on-device vs later-sync principles, logging redaction, the crash-reporting **not configured** decision, and consent/purpose scaffolding are in [`privacy-baseline.md`](privacy-baseline.md). Lawful basis and user-facing legal copy remain TODO for product/legal.
+Classification, on-device vs later-sync principles, logging redaction, the crash-reporting **not configured** decision, and consent/purpose scaffolding are in [`privacy-baseline.md`](privacy-baseline.md). Lawful basis and user-facing legal copy remain TODO for product/legal. TestFlight / Play internal-track prerequisites (no in-repo certs; signing ownership TBD) are in [`release-checklist.md`](release-checklist.md).
 
 ## Development safeguards
 
