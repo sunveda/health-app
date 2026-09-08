@@ -1,11 +1,17 @@
 import SwiftUI
 
 struct DashboardView: View {
+    let dependencies: AppDependencies
+
     var body: some View {
         NavigationStack {
             List {
                 Section("Today") {
                     Label("Connect your verified identity", systemImage: "person.badge.key")
+                    LabeledContent("Identity session") {
+                        Text(displayLabel(for: dependencies.identitySession.status))
+                            .foregroundStyle(.secondary)
+                    }
                     Label("Review wellness sync status", systemImage: "arrow.triangle.2.circlepath")
                 }
 
@@ -23,11 +29,17 @@ struct DashboardView: View {
 }
 
 struct HealthView: View {
+    let dependencies: AppDependencies
+
     var body: some View {
         NavigationStack {
             List {
                 Section("Connected sources") {
-                    HealthSourceRow(title: "Apple Health", detail: "Not connected", symbol: "heart.fill")
+                    HealthSourceRow(
+                        title: "Apple Health",
+                        detail: displayLabel(for: dependencies.healthDataSource.status),
+                        symbol: "heart.fill"
+                    )
                     HealthSourceRow(title: "Medical records", detail: "Not connected", symbol: "cross.case.fill")
                 }
             }
@@ -50,6 +62,8 @@ struct ExpensesView: View {
 }
 
 struct SettingsView: View {
+    let dependencies: AppDependencies
+
     var body: some View {
         NavigationStack {
             List {
@@ -59,8 +73,29 @@ struct SettingsView: View {
                 }
 
                 Section("Account") {
-                    Label("Identity verification", systemImage: "person.badge.key")
-                    Label("Biometric unlock", systemImage: "faceid")
+                    LabeledContent("Identity verification") {
+                        Text(displayLabel(for: dependencies.identitySession.status))
+                            .foregroundStyle(.secondary)
+                    }
+                    LabeledContent("Biometric unlock") {
+                        Text(displayLabel(for: dependencies.biometricUnlock.status))
+                            .foregroundStyle(.secondary)
+                    }
+                }
+
+                Section("Platform capabilities") {
+                    LabeledContent("Application secure store") {
+                        Text(displayLabel(for: dependencies.secureStore.applicationStoreStatus))
+                            .foregroundStyle(.secondary)
+                    }
+                    LabeledContent("Biometric-gated store") {
+                        Text(displayLabel(for: dependencies.secureStore.biometricGatedStoreStatus))
+                            .foregroundStyle(.secondary)
+                    }
+                    LabeledContent("NFC") {
+                        Text(displayLabel(for: dependencies.nfcCapability.status))
+                            .foregroundStyle(.secondary)
+                    }
                 }
             }
             .navigationTitle("Settings")

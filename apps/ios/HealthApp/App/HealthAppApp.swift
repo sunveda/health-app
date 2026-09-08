@@ -2,22 +2,26 @@ import SwiftUI
 
 @main
 struct HealthAppApp: App {
+    private let dependencies = CompositionRoot.make()
+
     var body: some Scene {
         WindowGroup {
-            RootView()
+            RootView(dependencies: dependencies)
         }
     }
 }
 
 struct RootView: View {
+    let dependencies: AppDependencies
+
     var body: some View {
         TabView {
-            DashboardView()
+            DashboardView(dependencies: dependencies)
                 .tabItem {
                     Label("Home", systemImage: "heart.text.square")
                 }
 
-            HealthView()
+            HealthView(dependencies: dependencies)
                 .tabItem {
                     Label("Health", systemImage: "waveform.path.ecg")
                 }
@@ -27,7 +31,7 @@ struct RootView: View {
                     Label("Expenses", systemImage: "yensign.circle")
                 }
 
-            SettingsView()
+            SettingsView(dependencies: dependencies)
                 .tabItem {
                     Label("Settings", systemImage: "gearshape")
                 }
@@ -37,5 +41,5 @@ struct RootView: View {
 }
 
 #Preview {
-    RootView()
+    RootView(dependencies: CompositionRoot.make())
 }

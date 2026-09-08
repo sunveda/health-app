@@ -15,15 +15,15 @@ A native mobile monorepo for the iOS and Android clients of the My Number Health
 
 ## Native application strategy
 
-The iOS app is implemented with SwiftUI. Its native integration boundary is intended for Apple HealthKit, Keychain-backed credential storage, Face ID or Touch ID, approved OIDC/PKCE identity handoff, document selection, and NFC capabilities.
+The iOS app is implemented with SwiftUI. Capability access (HealthKit, Keychain, Face ID or Touch ID, NFC) goes through `HealthApp/Core` adapters constructed by a single composition root. Feature screens must not import those frameworks.
 
-The Android app is implemented with Kotlin and Jetpack Compose. Its native integration boundary is intended for Health Connect, Android Keystore-backed credential storage, BiometricPrompt, approved OIDC/PKCE identity handoff, document selection, and NFC capabilities.
+The Android app is implemented with Kotlin and Jetpack Compose. Capability access (Health Connect, Android Keystore, BiometricPrompt, NFC) goes through `platform` adapters constructed by a single composition root. Feature screens must not import those APIs.
 
 The applications share **contracts**, not UI code. This avoids a lowest-common-denominator user experience and allows each platform to follow its own permission, lifecycle, security, and accessibility conventions.
 
 ## Current status
 
-The repository contains initial native application shells, shared contract schemas, and security documentation. The My Number identity-provider integration, HealthKit and Health Connect permissions, NFC reader support, secure upload pipeline, backend services, and Vertex AI workflows are deliberately not wired to guessed endpoints or credentials. Those integrations require official provider documentation, app registration, compliance approval, and threat-model review.
+The repository contains native application shells, a Core/platform composition root with NotConfigured adapters, shared contract schemas, and security documentation. The My Number identity-provider integration, HealthKit and Health Connect permissions, NFC reader support, secure upload pipeline, backend services, and Vertex AI workflows are deliberately not wired to guessed endpoints or credentials. Those integrations require official provider documentation, app registration, compliance approval, and threat-model review.
 
 ## Working locally
 
