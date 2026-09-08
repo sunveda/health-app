@@ -78,3 +78,42 @@ interface TelemetryPolicy {
     val status: CapabilityStatus
     fun isAllowed(category: DataCategory): Boolean
 }
+
+/** Client-side type/size checks. Stubs do not inspect bytes or call a scanner vendor. */
+interface FileValidation {
+    val status: CapabilityStatus
+    fun validate(descriptor: ClinicalFileDescriptor): CapabilityOutcome<Unit>
+}
+
+/** Local holding area before any upload. Stubs store nothing. */
+interface QuarantineStore {
+    val status: CapabilityStatus
+    fun storedDocumentIds(): CapabilityOutcome<List<String>>
+    fun quarantine(descriptor: ClinicalFileDescriptor): CapabilityOutcome<Unit>
+    fun discard(documentId: String): CapabilityOutcome<Unit>
+}
+
+/** Encrypted report upload. Stubs never open a network session or invent a URL. */
+interface ReportUploadClient {
+    val status: CapabilityStatus
+    fun upload(documentId: String): CapabilityOutcome<Unit>
+}
+
+/** Upload/review surface. Document selection stays behind this adapter and must not present a picker on stubs. */
+interface ClinicalDocumentPipeline {
+    val status: CapabilityStatus
+    val lastFailure: CapabilityStatus?
+    val activeStage: ClinicalPipelineStage?
+
+    /** Never presents a system document picker on stubs; does not request photo or files permissions. */
+    fun requestDocumentSelection(): CapabilityOutcome<Unit>
+    fun startReview(documentId: String): CapabilityOutcome<Unit>
+    fun delete(documentId: String): CapabilityOutcome<Unit>
+
+    fun capabilitySnapshot(): ClinicalCapabilitySnapshot =
+        ClinicalCapabilitySnapshot(
+            availability = status,
+            lastFailure = lastFailure,
+            activeStage = activeStage,
+        )
+}

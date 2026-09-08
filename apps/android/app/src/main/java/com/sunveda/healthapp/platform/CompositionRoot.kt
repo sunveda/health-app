@@ -11,6 +11,10 @@ data class PlatformDependencies(
     val consentStore: ConsentStore,
     val crashReporter: CrashReporter,
     val telemetryPolicy: TelemetryPolicy,
+    val fileValidation: FileValidation,
+    val quarantineStore: QuarantineStore,
+    val reportUpload: ReportUploadClient,
+    val clinicalPipeline: ClinicalDocumentPipeline,
 )
 
 /** Single composition root. The only type allowed to construct platform adapter implementations. */
@@ -26,5 +30,9 @@ object CompositionRoot {
             consentStore = NotConfiguredConsentStore(),
             crashReporter = NotConfiguredCrashReporter(),
             telemetryPolicy = NotConfiguredTelemetryPolicy(),
+            fileValidation = NotConfiguredFileValidation(),
+            quarantineStore = NotConfiguredQuarantineStore(),
+            reportUpload = NotConfiguredReportUploadClient(),
+            clinicalPipeline = NotConfiguredClinicalDocumentPipeline(),
         )
 }

@@ -10,6 +10,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import com.sunveda.healthapp.platform.ClinicalCopyPlaceholder
+import com.sunveda.healthapp.platform.ClinicalPresentation
 import com.sunveda.healthapp.platform.PlatformDependencies
 import com.sunveda.healthapp.platform.PrivacyCopyPlaceholder
 import com.sunveda.healthapp.platform.WellnessCopyPlaceholder
@@ -21,7 +23,8 @@ fun HomeScreen(dependencies: PlatformDependencies, modifier: Modifier = Modifier
     PortalPlaceholder(
         title = "Home",
         detail = "Identity session: ${dependencies.identitySession.status.toDisplayLabel()}\n" +
-            "Wellness sync: ${dependencies.wellnessSync.status.toDisplayLabel()}",
+            "Wellness sync: ${dependencies.wellnessSync.status.toDisplayLabel()}\n" +
+            "Clinical pipeline: ${dependencies.clinicalPipeline.status.toDisplayLabel()}",
         modifier = modifier,
     )
 }
@@ -62,6 +65,36 @@ fun HealthScreen(dependencies: PlatformDependencies, modifier: Modifier = Modifi
         )
         Text(
             text = WellnessCopyPlaceholder.KIT_WIRING_DEFERRED,
+            modifier = Modifier.padding(top = 8.dp),
+            style = MaterialTheme.typography.bodySmall,
+        )
+        Text(
+            text = "Clinical pipeline: ${dependencies.clinicalPipeline.status.toDisplayLabel()}",
+            modifier = Modifier.padding(top = 12.dp),
+            style = MaterialTheme.typography.bodyMedium,
+        )
+        Text(
+            text = "Clinical active stage: ${ClinicalPresentation.activeStageLabel(dependencies.clinicalPipeline.activeStage)}",
+            modifier = Modifier.padding(top = 4.dp),
+            style = MaterialTheme.typography.bodyMedium,
+        )
+        Text(
+            text = "Report upload: ${dependencies.reportUpload.status.toDisplayLabel()}",
+            modifier = Modifier.padding(top = 4.dp),
+            style = MaterialTheme.typography.bodyMedium,
+        )
+        Text(
+            text = "File validation: ${dependencies.fileValidation.status.toDisplayLabel()}",
+            modifier = Modifier.padding(top = 4.dp),
+            style = MaterialTheme.typography.bodyMedium,
+        )
+        Text(
+            text = "Quarantine: ${dependencies.quarantineStore.status.toDisplayLabel()}",
+            modifier = Modifier.padding(top = 4.dp),
+            style = MaterialTheme.typography.bodyMedium,
+        )
+        Text(
+            text = ClinicalCopyPlaceholder.PIPELINE_NOT_CONFIGURED,
             modifier = Modifier.padding(top = 8.dp),
             style = MaterialTheme.typography.bodySmall,
         )
@@ -127,6 +160,36 @@ fun SettingsScreen(dependencies: PlatformDependencies, modifier: Modifier = Modi
         )
         Text(
             text = WellnessCopyPlaceholder.KIT_WIRING_DEFERRED,
+            modifier = Modifier.padding(top = 4.dp),
+            style = MaterialTheme.typography.bodySmall,
+        )
+        Text(
+            text = "Clinical pipeline: ${dependencies.clinicalPipeline.status.toDisplayLabel()}",
+            modifier = Modifier.padding(top = 12.dp),
+            style = MaterialTheme.typography.bodyMedium,
+        )
+        Text(
+            text = "Report upload: ${dependencies.reportUpload.status.toDisplayLabel()}",
+            modifier = Modifier.padding(top = 4.dp),
+            style = MaterialTheme.typography.bodyMedium,
+        )
+        Text(
+            text = "File validation: ${dependencies.fileValidation.status.toDisplayLabel()}",
+            modifier = Modifier.padding(top = 4.dp),
+            style = MaterialTheme.typography.bodyMedium,
+        )
+        Text(
+            text = "Quarantine: ${dependencies.quarantineStore.status.toDisplayLabel()}",
+            modifier = Modifier.padding(top = 4.dp),
+            style = MaterialTheme.typography.bodyMedium,
+        )
+        Text(
+            text = ClinicalCopyPlaceholder.PIPELINE_NOT_CONFIGURED,
+            modifier = Modifier.padding(top = 4.dp),
+            style = MaterialTheme.typography.bodySmall,
+        )
+        Text(
+            text = ClinicalCopyPlaceholder.NO_UPLOAD_ENDPOINT,
             modifier = Modifier.padding(top = 4.dp),
             style = MaterialTheme.typography.bodySmall,
         )

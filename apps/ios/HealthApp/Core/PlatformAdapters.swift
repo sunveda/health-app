@@ -79,3 +79,45 @@ protocol TelemetryPolicy {
     var status: CapabilityStatus { get }
     func isAllowed(_ category: DataCategory) -> Bool
 }
+
+/// Client-side type/size checks. Stubs do not inspect bytes or call a scanner vendor.
+protocol FileValidation {
+    var status: CapabilityStatus { get }
+    func validate(descriptor: ClinicalFileDescriptor) -> Result<Void, CapabilityError>
+}
+
+/// Local holding area before any upload. Stubs store nothing.
+protocol QuarantineStore {
+    var status: CapabilityStatus { get }
+    func storedDocumentIds() -> Result<[String], CapabilityError>
+    func quarantine(descriptor: ClinicalFileDescriptor) -> Result<Void, CapabilityError>
+    func discard(documentId: String) -> Result<Void, CapabilityError>
+}
+
+/// Encrypted report upload. Stubs never open a network session or invent a URL.
+protocol ReportUploadClient {
+    var status: CapabilityStatus { get }
+    func upload(documentId: String) -> Result<Void, CapabilityError>
+}
+
+/// Upload/review surface. Document selection stays behind this adapter and must not present a picker on stubs.
+protocol ClinicalDocumentPipeline {
+    var status: CapabilityStatus { get }
+    var lastFailure: CapabilityError? { get }
+    var activeStage: ClinicalPipelineStage? { get }
+
+    /// Never presents a system document picker on stubs; does not request photo or files permissions.
+    func requestDocumentSelection() -> Result<Void, CapabilityError>
+    func startReview(documentId: String) -> Result<Void, CapabilityError>
+    func delete(documentId: String) -> Result<Void, CapabilityError>
+}
+
+extension ClinicalDocumentPipeline {
+    func capabilitySnapshot() -> ClinicalCapabilitySnapshot {
+        ClinicalCapabilitySnapshot(
+            availability: status,
+            lastFailure: lastFailure,
+            activeStage: activeStage
+        )
+    }
+}

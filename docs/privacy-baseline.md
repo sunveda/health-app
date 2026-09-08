@@ -79,3 +79,5 @@ User-facing consent language, withdrawal copy, and retention notices are **TODO 
 Identity remains blocked on IdP registration, official scopes, threat-model, and legal review. This baseline does not unblock OIDC, biometrics, HealthKit, Health Connect, NFC, or backend clients.
 
 Wellness NotConfigured adapter notes (intended later read scopes, deferred kit wiring, feature flag) live in [`wellness-baseline.md`](wellness-baseline.md). Those stubs do not complete Wellness.
+
+Clinical NotConfigured upload/review notes (intended later pipeline stages, deferred picker and network wiring) live in [`clinical-baseline.md`](clinical-baseline.md). Those stubs do not complete Clinical.
