@@ -40,6 +40,17 @@ class CompositionRootTest {
         assertEquals(CapabilityStatus.NOT_CONFIGURED, dependencies.crashReporter.status)
         assertEquals(CapabilityStatus.NOT_CONFIGURED, dependencies.telemetryPolicy.status)
         assertEquals(false, dependencies.telemetryPolicy.isAllowed(DataCategory.TELEMETRY))
+        assertEquals(CapabilityStatus.NOT_CONFIGURED, dependencies.fileValidation.status)
+        assertEquals(CapabilityStatus.NOT_CONFIGURED, dependencies.quarantineStore.status)
+        assertEquals(CapabilityStatus.NOT_CONFIGURED, dependencies.reportUpload.status)
+        assertEquals(CapabilityStatus.NOT_CONFIGURED, dependencies.clinicalPipeline.status)
+        assertEquals(CapabilityStatus.NOT_CONFIGURED, dependencies.clinicalPipeline.lastFailure)
+        assertNull(dependencies.clinicalPipeline.activeStage)
+        assertEquals(ClinicalCapabilitySnapshot.notConfigured, dependencies.clinicalPipeline.capabilitySnapshot())
+        assertEquals(
+            ClinicalSurfaceStatus.NOT_CONFIGURED,
+            ClinicalSurfaceMapping.status(dependencies.clinicalPipeline.capabilitySnapshot()),
+        )
     }
 }
 
@@ -330,5 +341,184 @@ class WellnessBaselineTest {
         assertEquals(false, joined.contains("connected to healthkit"))
         assertEquals(false, joined.contains("identity complete"))
         assertEquals(false, joined.contains("clinical complete"))
+    }
+}
+
+class ClinicalBaselineTest {
+    @Test
+    fun surfaceMappingCoversStubAndLaterStates() {
+        assertEquals(
+            ClinicalSurfaceStatus.NOT_CONFIGURED,
+            ClinicalSurfaceMapping.status(ClinicalCapabilitySnapshot.notConfigured),
+        )
+        assertEquals(
+            ClinicalSurfaceStatus.UNAVAILABLE,
+            ClinicalSurfaceMapping.status(ClinicalCapabilitySnapshot.unavailable),
+        )
+
+        val idle = ClinicalCapabilitySnapshot(
+            availability = CapabilityStatus.READY,
+            lastFailure = null,
+            activeStage = null,
+        )
+        assertEquals(ClinicalSurfaceStatus.IDLE, ClinicalSurfaceMapping.status(idle))
+
+        val inProgress = ClinicalCapabilitySnapshot(
+            availability = CapabilityStatus.READY,
+            lastFailure = null,
+            activeStage = ClinicalPipelineStage.VALIDATION,
+        )
+        assertEquals(ClinicalSurfaceStatus.IN_PROGRESS, ClinicalSurfaceMapping.status(inProgress))
+
+        val failedReady = ClinicalCapabilitySnapshot(
+            availability = CapabilityStatus.READY,
+            lastFailure = CapabilityStatus.UNAVAILABLE,
+            activeStage = ClinicalPipelineStage.UPLOAD,
+        )
+        assertEquals(ClinicalSurfaceStatus.UNAVAILABLE, ClinicalSurfaceMapping.status(failedReady))
+
+        val permissionRequired = ClinicalCapabilitySnapshot(
+            availability = CapabilityStatus.PERMISSION_REQUIRED,
+            lastFailure = null,
+            activeStage = ClinicalPipelineStage.SELECTION,
+        )
+        assertEquals(ClinicalSurfaceStatus.NOT_CONFIGURED, ClinicalSurfaceMapping.status(permissionRequired))
+    }
+
+    @Test
+    fun presentationAndSurfaceLabels() {
+        assertEquals("None", ClinicalPresentation.stagesLabel(emptySet()))
+        assertEquals("Review", ClinicalPresentation.stagesLabel(setOf(ClinicalPipelineStage.REVIEW)))
+        assertEquals(
+            "Selection, Validation, Deletion",
+            ClinicalPresentation.stagesLabel(
+                setOf(
+                    ClinicalPipelineStage.DELETION,
+                    ClinicalPipelineStage.SELECTION,
+                    ClinicalPipelineStage.VALIDATION,
+                ),
+            ),
+        )
+        assertEquals("None", ClinicalPresentation.activeStageLabel(null))
+        assertEquals("Quarantine", ClinicalPresentation.activeStageLabel(ClinicalPipelineStage.QUARANTINE))
+        assertEquals("Not configured", ClinicalSurfaceStatus.NOT_CONFIGURED.toDisplayLabel())
+        assertEquals("Unavailable", ClinicalSurfaceStatus.UNAVAILABLE.toDisplayLabel())
+        assertEquals("Idle", ClinicalSurfaceStatus.IDLE.toDisplayLabel())
+        assertEquals("In progress", ClinicalSurfaceStatus.IN_PROGRESS.toDisplayLabel())
+        assertEquals("Upload", ClinicalPipelineStage.UPLOAD.toDisplayLabel())
+    }
+
+    @Test
+    fun notConfiguredAdaptersRejectPipelineWork() {
+        val descriptor = ClinicalFileDescriptor(
+            documentId = "SYNTH-CLINICAL-DOC-1",
+            declaredType = ClinicalDeclaredType.PDF,
+            byteSize = 1024,
+        )
+
+        val validation = NotConfiguredFileValidation()
+        assertEquals(CapabilityStatus.NOT_CONFIGURED, validation.status)
+        assertEquals(
+            CapabilityOutcome.Unavailable(CapabilityStatus.NOT_CONFIGURED),
+            validation.validate(descriptor),
+        )
+
+        val unavailableValidation = UnavailableFileValidation()
+        assertEquals(
+            CapabilityOutcome.Unavailable(CapabilityStatus.UNAVAILABLE),
+            unavailableValidation.validate(descriptor),
+        )
+
+        val quarantine = NotConfiguredQuarantineStore()
+        assertEquals(CapabilityStatus.NOT_CONFIGURED, quarantine.status)
+        assertEquals(
+            CapabilityOutcome.Unavailable(CapabilityStatus.NOT_CONFIGURED),
+            quarantine.storedDocumentIds(),
+        )
+        assertEquals(
+            CapabilityOutcome.Unavailable(CapabilityStatus.NOT_CONFIGURED),
+            quarantine.quarantine(descriptor),
+        )
+        assertEquals(
+            CapabilityOutcome.Unavailable(CapabilityStatus.NOT_CONFIGURED),
+            quarantine.discard(descriptor.documentId),
+        )
+
+        val unavailableQuarantine = UnavailableQuarantineStore()
+        assertEquals(
+            CapabilityOutcome.Unavailable(CapabilityStatus.UNAVAILABLE),
+            unavailableQuarantine.storedDocumentIds(),
+        )
+        assertEquals(
+            CapabilityOutcome.Unavailable(CapabilityStatus.UNAVAILABLE),
+            unavailableQuarantine.discard(descriptor.documentId),
+        )
+
+        val upload = NotConfiguredReportUploadClient()
+        assertEquals(CapabilityStatus.NOT_CONFIGURED, upload.status)
+        assertEquals(
+            CapabilityOutcome.Unavailable(CapabilityStatus.NOT_CONFIGURED),
+            upload.upload(descriptor.documentId),
+        )
+
+        val unavailableUpload = UnavailableReportUploadClient()
+        assertEquals(
+            CapabilityOutcome.Unavailable(CapabilityStatus.UNAVAILABLE),
+            unavailableUpload.upload(descriptor.documentId),
+        )
+
+        val pipeline = NotConfiguredClinicalDocumentPipeline()
+        assertEquals(ClinicalCapabilitySnapshot.notConfigured, pipeline.capabilitySnapshot())
+        assertNull(pipeline.activeStage)
+        assertEquals(
+            CapabilityOutcome.Unavailable(CapabilityStatus.NOT_CONFIGURED),
+            pipeline.requestDocumentSelection(),
+        )
+        assertEquals(
+            CapabilityOutcome.Unavailable(CapabilityStatus.NOT_CONFIGURED),
+            pipeline.startReview(descriptor.documentId),
+        )
+        assertEquals(
+            CapabilityOutcome.Unavailable(CapabilityStatus.NOT_CONFIGURED),
+            pipeline.delete(descriptor.documentId),
+        )
+        assertEquals(
+            ClinicalSurfaceStatus.NOT_CONFIGURED,
+            ClinicalSurfaceMapping.status(pipeline.capabilitySnapshot()),
+        )
+
+        val unavailablePipeline = UnavailableClinicalDocumentPipeline()
+        assertEquals(ClinicalCapabilitySnapshot.unavailable, unavailablePipeline.capabilitySnapshot())
+        assertEquals(
+            CapabilityOutcome.Unavailable(CapabilityStatus.UNAVAILABLE),
+            unavailablePipeline.requestDocumentSelection(),
+        )
+        assertEquals(
+            CapabilityOutcome.Unavailable(CapabilityStatus.UNAVAILABLE),
+            unavailablePipeline.startReview(descriptor.documentId),
+        )
+        assertEquals(
+            CapabilityOutcome.Unavailable(CapabilityStatus.UNAVAILABLE),
+            unavailablePipeline.delete(descriptor.documentId),
+        )
+    }
+
+    @Test
+    fun copyDoesNotClaimUploadOrCompletedStages() {
+        val copy = listOf(
+            ClinicalCopyPlaceholder.PIPELINE_NOT_CONFIGURED,
+            ClinicalCopyPlaceholder.NO_UPLOAD_ENDPOINT,
+        )
+        copy.forEach { line ->
+            assertEquals(true, line.isNotBlank())
+        }
+        val joined = copy.joinToString(" ").lowercase()
+        assertEquals(true, joined.contains("not configured"))
+        assertEquals(true, joined.contains("deferred") || joined.contains("unavailable"))
+        assertEquals(false, joined.contains("upload complete"))
+        assertEquals(false, joined.contains("identity complete"))
+        assertEquals(false, joined.contains("clinical complete"))
+        assertEquals(false, joined.contains("storage.googleapis.com"))
+        assertEquals(false, joined.contains("s3.amazonaws.com"))
     }
 }

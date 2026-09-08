@@ -107,6 +107,59 @@ KIT_PATTERNS = (
         "Android NFC API usage",
         re.compile(r"(?m)^\s*import android\.nfc\b|\bNfcAdapter\b"),
     ),
+    (
+        "iOS document/photo picker",
+        re.compile(
+            r"\bUIDocumentPickerViewController\b|"
+            r"\bUIDocumentPickerDelegate\b|"
+            r"\bUIDocumentBrowserViewController\b|"
+            r"\bPHPickerViewController\b|"
+            r"\bUIImagePickerController\b|"
+            r"\bNSPhotoLibraryUsageDescription\b|"
+            r"\bNSPhotoLibraryAddUsageDescription\b"
+        ),
+    ),
+    (
+        "Android document/photo picker",
+        re.compile(
+            r"ActivityResultContracts\.(?:GetContent|OpenDocument|OpenMultipleDocuments|PickVisualMedia)\b|"
+            r"\bACTION_(?:GET_CONTENT|OPEN_DOCUMENT|OPEN_DOCUMENT_TREE)\b|"
+            r"android\.permission\.READ_MEDIA_IMAGES\b|"
+            r"android\.permission\.READ_MEDIA_VISUAL_USER_SELECTED\b"
+        ),
+    ),
+    (
+        "AWS / GCP / Firebase upload SDK",
+        re.compile(
+            r"(?m)^\s*import AWSS3\b|"
+            r"\bAWSS3TransferUtility\b|"
+            r"\bAmazonS3Client\b|"
+            r"\bAWSS3StoragePlugin\b|"
+            r"com\.amazonaws\.(?:mobileconnectors|services)\.s3\b|"
+            r"software\.amazon\.awssdk\.services\.s3\b|"
+            r"com\.amazonaws:aws-android-sdk-s3\b|"
+            r"software\.amazon\.awssdk:s3\b|"
+            r"amplifyframework:aws-storage|"
+            r"com\.google\.cloud\.storage\b|"
+            r"com\.google\.cloud:google-cloud-storage\b|"
+            r"com\.google\.firebase\.storage\b|"
+            r"com\.google\.firebase:firebase-storage\b|"
+            r"^\s*import FirebaseStorage\b|"
+            r"\bFirebaseStorage\b"
+        ),
+    ),
+    (
+        "Hardcoded object-storage upload URL",
+        re.compile(
+            r"https?://[^\"'\s]*storage\.googleapis\.com|"
+            r"https?://[^\"'\s]*storage\.cloud\.google\.com|"
+            r"https?://s3\.amazonaws\.com|"
+            r"https?://s3[.-][a-z0-9-]+\.amazonaws\.com|"
+            r"https?://[^\"'\s]*\.s3[.-][a-z0-9-]*\.amazonaws\.com|"
+            r"https?://[^\"'\s]*firebasestorage\.googleapis\.com|"
+            r"https?://[^\"'\s]*\.blob\.core\.windows\.net"
+        ),
+    ),
 )
 
 ADAPTER_CONSTRUCTOR = re.compile(

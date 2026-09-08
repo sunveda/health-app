@@ -218,3 +218,103 @@ struct UnavailableTelemetryPolicy: TelemetryPolicy {
         false
     }
 }
+
+struct NotConfiguredFileValidation: FileValidation {
+    let status = CapabilityStatus.notConfigured
+
+    func validate(descriptor _: ClinicalFileDescriptor) -> Result<Void, CapabilityError> {
+        .failure(.notConfigured)
+    }
+}
+
+struct UnavailableFileValidation: FileValidation {
+    let status = CapabilityStatus.unavailable
+
+    func validate(descriptor _: ClinicalFileDescriptor) -> Result<Void, CapabilityError> {
+        .failure(.unavailable)
+    }
+}
+
+struct NotConfiguredQuarantineStore: QuarantineStore {
+    let status = CapabilityStatus.notConfigured
+
+    func storedDocumentIds() -> Result<[String], CapabilityError> {
+        .failure(.notConfigured)
+    }
+
+    func quarantine(descriptor _: ClinicalFileDescriptor) -> Result<Void, CapabilityError> {
+        .failure(.notConfigured)
+    }
+
+    func discard(documentId _: String) -> Result<Void, CapabilityError> {
+        .failure(.notConfigured)
+    }
+}
+
+struct UnavailableQuarantineStore: QuarantineStore {
+    let status = CapabilityStatus.unavailable
+
+    func storedDocumentIds() -> Result<[String], CapabilityError> {
+        .failure(.unavailable)
+    }
+
+    func quarantine(descriptor _: ClinicalFileDescriptor) -> Result<Void, CapabilityError> {
+        .failure(.unavailable)
+    }
+
+    func discard(documentId _: String) -> Result<Void, CapabilityError> {
+        .failure(.unavailable)
+    }
+}
+
+struct NotConfiguredReportUploadClient: ReportUploadClient {
+    let status = CapabilityStatus.notConfigured
+
+    func upload(documentId _: String) -> Result<Void, CapabilityError> {
+        .failure(.notConfigured)
+    }
+}
+
+struct UnavailableReportUploadClient: ReportUploadClient {
+    let status = CapabilityStatus.unavailable
+
+    func upload(documentId _: String) -> Result<Void, CapabilityError> {
+        .failure(.unavailable)
+    }
+}
+
+struct NotConfiguredClinicalDocumentPipeline: ClinicalDocumentPipeline {
+    let status = CapabilityStatus.notConfigured
+    let lastFailure: CapabilityError? = .notConfigured
+    let activeStage: ClinicalPipelineStage? = nil
+
+    func requestDocumentSelection() -> Result<Void, CapabilityError> {
+        .failure(.notConfigured)
+    }
+
+    func startReview(documentId _: String) -> Result<Void, CapabilityError> {
+        .failure(.notConfigured)
+    }
+
+    func delete(documentId _: String) -> Result<Void, CapabilityError> {
+        .failure(.notConfigured)
+    }
+}
+
+struct UnavailableClinicalDocumentPipeline: ClinicalDocumentPipeline {
+    let status = CapabilityStatus.unavailable
+    let lastFailure: CapabilityError? = .unavailable
+    let activeStage: ClinicalPipelineStage? = nil
+
+    func requestDocumentSelection() -> Result<Void, CapabilityError> {
+        .failure(.unavailable)
+    }
+
+    func startReview(documentId _: String) -> Result<Void, CapabilityError> {
+        .failure(.unavailable)
+    }
+
+    func delete(documentId _: String) -> Result<Void, CapabilityError> {
+        .failure(.unavailable)
+    }
+}

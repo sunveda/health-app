@@ -17,6 +17,10 @@ struct DashboardView: View {
                         Text(displayLabel(for: dependencies.wellnessSync.status))
                             .foregroundStyle(.secondary)
                     }
+                    LabeledContent("Clinical pipeline") {
+                        Text(displayLabel(for: dependencies.clinicalPipeline.status))
+                            .foregroundStyle(.secondary)
+                    }
                 }
 
                 Section("Insights") {
@@ -46,7 +50,11 @@ struct HealthView: View {
                         detail: displayLabel(for: snapshot.availability),
                         symbol: "heart.fill"
                     )
-                    HealthSourceRow(title: "Medical records", detail: "Not connected", symbol: "cross.case.fill")
+                    HealthSourceRow(
+                        title: "Medical records",
+                        detail: displayLabel(for: dependencies.clinicalPipeline.status),
+                        symbol: "cross.case.fill"
+                    )
                 }
 
                 Section("Wellness") {
@@ -67,6 +75,32 @@ struct HealthView: View {
                             .foregroundStyle(.secondary)
                     }
                     Text(WellnessCopyPlaceholder.kitWiringDeferred)
+                        .font(.footnote)
+                        .foregroundStyle(.secondary)
+                }
+
+                Section("Clinical") {
+                    LabeledContent("Pipeline") {
+                        Text(displayLabel(for: dependencies.clinicalPipeline.status))
+                            .foregroundStyle(.secondary)
+                    }
+                    LabeledContent("Active stage") {
+                        Text(ClinicalPresentation.activeStageLabel(dependencies.clinicalPipeline.activeStage))
+                            .foregroundStyle(.secondary)
+                    }
+                    LabeledContent("Upload") {
+                        Text(displayLabel(for: dependencies.reportUpload.status))
+                            .foregroundStyle(.secondary)
+                    }
+                    LabeledContent("Validation") {
+                        Text(displayLabel(for: dependencies.fileValidation.status))
+                            .foregroundStyle(.secondary)
+                    }
+                    LabeledContent("Quarantine") {
+                        Text(displayLabel(for: dependencies.quarantineStore.status))
+                            .foregroundStyle(.secondary)
+                    }
+                    Text(ClinicalCopyPlaceholder.pipelineNotConfigured)
                         .font(.footnote)
                         .foregroundStyle(.secondary)
                 }
@@ -138,6 +172,31 @@ struct SettingsView: View {
                         .font(.footnote)
                         .foregroundStyle(.secondary)
                     Text(WellnessCopyPlaceholder.kitWiringDeferred)
+                        .font(.footnote)
+                        .foregroundStyle(.secondary)
+                }
+
+                Section("Clinical") {
+                    LabeledContent("Pipeline") {
+                        Text(displayLabel(for: dependencies.clinicalPipeline.status))
+                            .foregroundStyle(.secondary)
+                    }
+                    LabeledContent("Upload") {
+                        Text(displayLabel(for: dependencies.reportUpload.status))
+                            .foregroundStyle(.secondary)
+                    }
+                    LabeledContent("Validation") {
+                        Text(displayLabel(for: dependencies.fileValidation.status))
+                            .foregroundStyle(.secondary)
+                    }
+                    LabeledContent("Quarantine") {
+                        Text(displayLabel(for: dependencies.quarantineStore.status))
+                            .foregroundStyle(.secondary)
+                    }
+                    Text(ClinicalCopyPlaceholder.pipelineNotConfigured)
+                        .font(.footnote)
+                        .foregroundStyle(.secondary)
+                    Text(ClinicalCopyPlaceholder.noUploadEndpoint)
                         .font(.footnote)
                         .foregroundStyle(.secondary)
                 }

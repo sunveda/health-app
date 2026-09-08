@@ -37,6 +37,8 @@ Classification, on-device vs later-sync principles, logging redaction, the crash
 
 Wellness device-health adapters remain **NotConfigured**: no HealthKit or Health Connect permission requests or reads. Intended later scopes and the feature-flag approach are in [`wellness-baseline.md`](wellness-baseline.md). That note does not complete the Wellness delivery stage.
 
+Clinical upload/review adapters remain **NotConfigured**: no document picker, network upload, quarantine store, or scanner vendor. Intended later pipeline stages are in [`clinical-baseline.md`](clinical-baseline.md). That note does not complete the Clinical delivery stage.
+
 ## Development safeguards
 
 Pull requests should include a data-classification note for new fields, tests for authorization and redaction, dependency review, and a statement about whether a new native permission is introduced. CI should scan for secrets and prohibited sample data. Fixtures must use synthetic values that cannot be mistaken for real identity or medical records.

@@ -11,6 +11,10 @@ struct AppDependencies {
     let consentStore: ConsentStore
     let crashReporter: CrashReporter
     let telemetryPolicy: TelemetryPolicy
+    let fileValidation: FileValidation
+    let quarantineStore: QuarantineStore
+    let reportUpload: ReportUploadClient
+    let clinicalPipeline: ClinicalDocumentPipeline
 }
 
 /// Single composition root. The only type allowed to construct platform adapter implementations.
@@ -25,7 +29,11 @@ enum CompositionRoot {
             identitySession: NotConfiguredIdentitySession(),
             consentStore: NotConfiguredConsentStore(),
             crashReporter: NotConfiguredCrashReporter(),
-            telemetryPolicy: NotConfiguredTelemetryPolicy()
+            telemetryPolicy: NotConfiguredTelemetryPolicy(),
+            fileValidation: NotConfiguredFileValidation(),
+            quarantineStore: NotConfiguredQuarantineStore(),
+            reportUpload: NotConfiguredReportUploadClient(),
+            clinicalPipeline: NotConfiguredClinicalDocumentPipeline()
         )
     }
 }

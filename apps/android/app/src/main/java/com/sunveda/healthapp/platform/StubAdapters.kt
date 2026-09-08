@@ -181,3 +181,87 @@ class UnavailableTelemetryPolicy : TelemetryPolicy {
 
     override fun isAllowed(category: DataCategory) = false
 }
+
+class NotConfiguredFileValidation : FileValidation {
+    override val status = CapabilityStatus.NOT_CONFIGURED
+
+    override fun validate(descriptor: ClinicalFileDescriptor) =
+        CapabilityOutcome.Unavailable(CapabilityStatus.NOT_CONFIGURED)
+}
+
+class UnavailableFileValidation : FileValidation {
+    override val status = CapabilityStatus.UNAVAILABLE
+
+    override fun validate(descriptor: ClinicalFileDescriptor) =
+        CapabilityOutcome.Unavailable(CapabilityStatus.UNAVAILABLE)
+}
+
+class NotConfiguredQuarantineStore : QuarantineStore {
+    override val status = CapabilityStatus.NOT_CONFIGURED
+
+    override fun storedDocumentIds() =
+        CapabilityOutcome.Unavailable(CapabilityStatus.NOT_CONFIGURED)
+
+    override fun quarantine(descriptor: ClinicalFileDescriptor) =
+        CapabilityOutcome.Unavailable(CapabilityStatus.NOT_CONFIGURED)
+
+    override fun discard(documentId: String) =
+        CapabilityOutcome.Unavailable(CapabilityStatus.NOT_CONFIGURED)
+}
+
+class UnavailableQuarantineStore : QuarantineStore {
+    override val status = CapabilityStatus.UNAVAILABLE
+
+    override fun storedDocumentIds() =
+        CapabilityOutcome.Unavailable(CapabilityStatus.UNAVAILABLE)
+
+    override fun quarantine(descriptor: ClinicalFileDescriptor) =
+        CapabilityOutcome.Unavailable(CapabilityStatus.UNAVAILABLE)
+
+    override fun discard(documentId: String) =
+        CapabilityOutcome.Unavailable(CapabilityStatus.UNAVAILABLE)
+}
+
+class NotConfiguredReportUploadClient : ReportUploadClient {
+    override val status = CapabilityStatus.NOT_CONFIGURED
+
+    override fun upload(documentId: String) =
+        CapabilityOutcome.Unavailable(CapabilityStatus.NOT_CONFIGURED)
+}
+
+class UnavailableReportUploadClient : ReportUploadClient {
+    override val status = CapabilityStatus.UNAVAILABLE
+
+    override fun upload(documentId: String) =
+        CapabilityOutcome.Unavailable(CapabilityStatus.UNAVAILABLE)
+}
+
+class NotConfiguredClinicalDocumentPipeline : ClinicalDocumentPipeline {
+    override val status = CapabilityStatus.NOT_CONFIGURED
+    override val lastFailure: CapabilityStatus? = CapabilityStatus.NOT_CONFIGURED
+    override val activeStage: ClinicalPipelineStage? = null
+
+    override fun requestDocumentSelection() =
+        CapabilityOutcome.Unavailable(CapabilityStatus.NOT_CONFIGURED)
+
+    override fun startReview(documentId: String) =
+        CapabilityOutcome.Unavailable(CapabilityStatus.NOT_CONFIGURED)
+
+    override fun delete(documentId: String) =
+        CapabilityOutcome.Unavailable(CapabilityStatus.NOT_CONFIGURED)
+}
+
+class UnavailableClinicalDocumentPipeline : ClinicalDocumentPipeline {
+    override val status = CapabilityStatus.UNAVAILABLE
+    override val lastFailure: CapabilityStatus? = CapabilityStatus.UNAVAILABLE
+    override val activeStage: ClinicalPipelineStage? = null
+
+    override fun requestDocumentSelection() =
+        CapabilityOutcome.Unavailable(CapabilityStatus.UNAVAILABLE)
+
+    override fun startReview(documentId: String) =
+        CapabilityOutcome.Unavailable(CapabilityStatus.UNAVAILABLE)
+
+    override fun delete(documentId: String) =
+        CapabilityOutcome.Unavailable(CapabilityStatus.UNAVAILABLE)
+}
