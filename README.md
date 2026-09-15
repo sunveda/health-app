@@ -2,6 +2,10 @@
 
 A native mobile monorepo for the iOS and Android clients of the My Number Health & Wellness Portal. The repository keeps the two applications separate so each platform can use its native security, health-data, NFC, and accessibility APIs while sharing product contracts and architecture decisions.
 
+## Agent handoff
+
+Living status for coding agents: **[docs/CONTEXT.md](docs/CONTEXT.md)**. Operating rules: **[AGENTS.md](AGENTS.md)**.
+
 ## Repository layout
 
 | Path | Responsibility |
@@ -11,7 +15,7 @@ A native mobile monorepo for the iOS and Android clients of the My Number Health
 | `packages/contracts` | Platform-neutral JSON Schemas for API and domain boundaries |
 | `packages/domain` | Platform-neutral synthetic medical-expense eligibility fixtures and tests |
 | `packages/api` | Reserved for versioned backend transport contracts |
-| `docs` | Architecture, security, privacy, and delivery decisions |
+| `docs` | Architecture, security, privacy, delivery decisions, and living [CONTEXT.md](docs/CONTEXT.md) |
 
 ## Native application strategy
 
@@ -24,6 +28,8 @@ The applications share **contracts**, not UI code. This avoids a lowest-common-d
 ## Current status
 
 The repository contains native application shells, a Core/platform composition root with NotConfigured adapters (including consent, crash reporting, telemetry policy, wellness sync, and clinical upload/review stubs), shared contract schemas, synthetic domain eligibility fixtures, and security/privacy baseline documentation. The My Number identity-provider integration, HealthKit and Health Connect permissions, NFC reader support, secure upload pipeline, backend services, and Vertex AI workflows are deliberately not wired to guessed endpoints or credentials. Those integrations require official provider documentation, app registration, compliance approval, and threat-model review.
+
+As of **2026-09-15**, active SunVeda eng focus is elsewhere; treat this repo as **CONTEXT-only** until the owner reopens Health App. See [docs/CONTEXT.md](docs/CONTEXT.md) for open/held PRs (including Android toolchain PR #15).
 
 ## Working locally
 
