@@ -36,7 +36,7 @@ Repo: https://github.com/sunveda/health-app
 
 ### Direction change — docs & specification first
 
-- Owner restart: **pause implementation**; prioritize documentation and specifications so the full stack is understandable from one screen ([STACK.md](STACK.md)) and work is tracked in [SPEC.md](SPEC.md).
+- Owner restart: **pause implementation**; prioritize documentation and specifications so the full stack is understandable from one screen ([STACK.md](STACK.md)) and work is tracked in [SPEC.md](SPEC.md). (#23)
 - Previous hold (2026-09-15, dual focus jkk-watch + Learn AI Now) is superseded for this repo’s **docs track**: CONTEXT + STACK + SPEC hygiene is the active work.
 - **Still no feature coding** (Identity, kits, clinical upload, backend) until the matching SPEC row is owner-approved.
 - Allowed PRs: STACK/SPEC/architecture/security/privacy drafts, CONTEXT updates, trivial AGENTS/README links, owner-requested security fixes.
