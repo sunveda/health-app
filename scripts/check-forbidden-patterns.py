@@ -13,11 +13,13 @@ ROOT = Path(__file__).resolve().parents[1]
 ADAPTER_ALLOWLIST_PREFIXES = (
     "apps/ios/HealthApp/Core/",
     "apps/android/app/src/main/java/com/sunveda/healthapp/platform/",
+    "apps/web/src/core/",
 )
 
 CONSTRUCTOR_ALLOWED_PATHS = (
     "apps/ios/HealthApp/Core/CompositionRoot.swift",
     "apps/android/app/src/main/java/com/sunveda/healthapp/platform/CompositionRoot.kt",
+    "apps/web/src/core/CompositionRoot.ts",
 )
 
 CODE_SUFFIXES = (
@@ -34,6 +36,10 @@ CODE_SUFFIXES = (
     ".xml",
     ".yml",
     ".yaml",
+    ".ts",
+    ".tsx",
+    ".js",
+    ".jsx",
 )
 
 SKIP_PATH_PREFIXES = (
@@ -192,6 +198,8 @@ def is_unit_test_path(path: str) -> bool:
         or path.endswith("Tests.swift")
         or path.endswith("Test.kt")
         or path.endswith("Tests.kt")
+        or path.endswith(".test.ts")
+        or path.endswith(".test.tsx")
     )
 
 

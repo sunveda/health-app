@@ -1,6 +1,6 @@
 # My Number Health & Wellness Portal
 
-A native mobile monorepo for the iOS and Android clients of the My Number Health & Wellness Portal. The repository keeps the two applications separate so each platform can use its native security, health-data, NFC, and accessibility APIs while sharing product contracts and architecture decisions.
+A client monorepo for the iOS, Android, and web surfaces of the My Number Health & Wellness Portal. The repository keeps each client separate so platforms can use their own security, health-data, NFC (mobile), and accessibility APIs while sharing product contracts and architecture decisions.
 
 ## Agent / handoff context
 
@@ -18,6 +18,7 @@ Update CONTEXT **daily while this repo is active**, and on every major direction
 |---|---|
 | `apps/ios` | Native SwiftUI iOS application and platform adapters |
 | `apps/android` | Native Kotlin and Jetpack Compose Android application and platform adapters |
+| `apps/web` | React + Vite + TypeScript web shell and platform adapters |
 | `packages/contracts` | Platform-neutral JSON Schemas for API and domain boundaries |
 | `packages/domain` | Platform-neutral synthetic medical-expense eligibility fixtures and tests |
 | `packages/api` | Reserved for versioned backend transport contracts |
@@ -29,7 +30,7 @@ The iOS app is implemented with SwiftUI. Capability access (HealthKit, Keychain,
 
 The Android app is implemented with Kotlin and Jetpack Compose. Capability access (Health Connect, Android Keystore, BiometricPrompt, NFC) goes through `platform` adapters constructed by a single composition root. Feature screens must not import those APIs.
 
-The applications share **contracts**, not UI code. This avoids a lowest-common-denominator user experience and allows each platform to follow its own permission, lifecycle, security, and accessibility conventions.
+The clients share **contracts**, not UI code. This avoids a lowest-common-denominator user experience and allows each platform to follow its own permission, lifecycle, security, and accessibility conventions. The web client does not emulate HealthKit, Health Connect, or NFC; see [`docs/web-baseline.md`](docs/web-baseline.md).
 
 ## Current status
 
@@ -44,6 +45,7 @@ As of **2026-09-29**, the active track is **docs & specification** ([STACK.md](d
 - [**STACK (one-screen tech map)**](docs/STACK.md)
 - [**SPEC (specification index)**](docs/SPEC.md)
 - [**CONTEXT (living handoff)**](docs/CONTEXT.md)
+- [`docs/web-baseline.md`](docs/web-baseline.md)
 - [`docs/architecture.md`](docs/architecture.md)
 - [`docs/security.md`](docs/security.md)
 - [`docs/privacy-baseline.md`](docs/privacy-baseline.md)
@@ -60,6 +62,17 @@ Open `apps/ios` in Xcode on macOS after adding the project configuration for the
 ### Android
 
 Open `apps/android` in Android Studio and sync the Gradle project. The current target uses Kotlin, Jetpack Compose, compile SDK 35, and a minimum SDK of 26.
+
+### Web
+
+From the repo root (pnpm workspace):
+
+```bash
+pnpm install
+pnpm --filter @health-app/web dev
+```
+
+See [`apps/web/README.md`](apps/web/README.md).
 
 ## Security principles
 
