@@ -38,7 +38,7 @@ Repo: https://github.com/sunveda/health-app
 ### Direction change — docs & specification first (+ web client)
 
 - Owner restart: prioritize documentation and specifications ([STACK.md](STACK.md), [SPEC.md](SPEC.md)). (#23)
-- Owner add: **web app version** — specified in [web-baseline.md](web-baseline.md) and scaffolded under `apps/web` (fail-closed shell only).
+- Owner add: **web app version** — specified in [web-baseline.md](web-baseline.md) and scaffolded under `apps/web` (fail-closed shell only). (#24)
 - **Still no Identity / kit / clinical / backend wiring** until the matching SPEC row is owner-approved.
 - Allowed PRs: STACK/SPEC/baselines, fail-closed client shells, CONTEXT updates, owner-requested security fixes.
 - Disallowed: inventing endpoints/scopes/credentials; real kit or IdP wiring.
@@ -46,7 +46,7 @@ Repo: https://github.com/sunveda/health-app
 ### `main` (approx.)
 
 - Native app shells + Core/platform composition roots with NotConfigured adapters
-- Web shell (`apps/web`) on this branch / pending merge — same fail-closed pattern
+- Web shell (`apps/web`) — same fail-closed pattern (#24)
 - Security/privacy baseline docs and release checklist
 - Wellness / Clinical NotConfigured stubs (no real kit uploads / no clinical pipeline)
 - **Identity still blocked**
