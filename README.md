@@ -4,10 +4,13 @@ A native mobile monorepo for the iOS and Android clients of the My Number Health
 
 ## Agent / handoff context
 
-**Start here:** [docs/CONTEXT.md](docs/CONTEXT.md) — living status for any agent or human.  
-Update that file **daily while this repo is active**, and on every major direction change (SunVeda rule for all projects).
+**Start here:**
 
-Also: [AGENTS.md](AGENTS.md)
+1. [docs/STACK.md](docs/STACK.md) — **one-screen stack** (every technology and boundary)
+2. [docs/SPEC.md](docs/SPEC.md) — specification index (docs-first writing order)
+3. [docs/CONTEXT.md](docs/CONTEXT.md) — living status for any agent or human
+
+Update CONTEXT **daily while this repo is active**, and on every major direction change (SunVeda rule for all projects). Also: [AGENTS.md](AGENTS.md)
 
 ## Repository layout
 
@@ -30,14 +33,16 @@ The applications share **contracts**, not UI code. This avoids a lowest-common-d
 
 ## Current status
 
-See [docs/CONTEXT.md](docs/CONTEXT.md) for living handoff detail (hold status, blockers, owners).
+See [docs/CONTEXT.md](docs/CONTEXT.md) for living handoff detail (blockers, owners).
 
 The repository contains native application shells, a Core/platform composition root with NotConfigured adapters (including consent, crash reporting, telemetry policy, wellness sync, and clinical upload/review stubs), shared contract schemas, synthetic domain eligibility fixtures, and security/privacy baseline documentation. The My Number identity-provider integration, HealthKit and Health Connect permissions, NFC reader support, secure upload pipeline, backend services, and Vertex AI workflows are deliberately not wired to guessed endpoints or credentials. Those integrations require official provider documentation, app registration, compliance approval, and threat-model review.
 
-As of 2026-09-15, feature work is **held** (SunVeda dual focus: jkk-watch + Learn AI Now). CONTEXT hygiene only until CoS resumes. Specialist bot: **Health App**. Coordinate via Chief of Staff.
+As of **2026-09-29**, the active track is **docs & specification** ([STACK.md](docs/STACK.md), [SPEC.md](docs/SPEC.md)) — not feature implementation. Specialist bot: **Health App**. Coordinate via Chief of Staff / Chief of Engineering.
 
 ## Docs
 
+- [**STACK (one-screen tech map)**](docs/STACK.md)
+- [**SPEC (specification index)**](docs/SPEC.md)
 - [**CONTEXT (living handoff)**](docs/CONTEXT.md)
 - [`docs/architecture.md`](docs/architecture.md)
 - [`docs/security.md`](docs/security.md)

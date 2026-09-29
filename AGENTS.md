@@ -5,8 +5,10 @@ Operating notes for any coding agent working in this repository.
 ## Read first
 
 1. **[docs/CONTEXT.md](docs/CONTEXT.md)** — living product status, blockers, who owns what. **Update it** on every active workday and on every major direction change (SunVeda house rule for all projects).
-2. [README.md](README.md)
-3. [docs/architecture.md](docs/architecture.md), [docs/security.md](docs/security.md), [docs/privacy-baseline.md](docs/privacy-baseline.md)
+2. **[docs/STACK.md](docs/STACK.md)** — **one-screen tech map** (all technologies / versions / boundaries).
+3. **[docs/SPEC.md](docs/SPEC.md)** — specification index and docs-first writing order.
+4. [README.md](README.md)
+5. [docs/architecture.md](docs/architecture.md), [docs/security.md](docs/security.md), [docs/privacy-baseline.md](docs/privacy-baseline.md)
 
 ## Product in one line
 
@@ -27,6 +29,6 @@ After meaningful work (feature merge, blocker change, scope pivot):
 2. Keep bullets short; link PRs by number
 3. If you only ship code and skip CONTEXT, the next agent starts blind — treat that as a bug
 
-## Hold note (2026-09-15)
+## Docs-first restart (2026-09-29)
 
-Feature work is **paused**. Dual active SunVeda focus is jkk-watch + Learn AI Now. Until CoS resumes health-app, only CONTEXT/docs hygiene (and owner-requested security fixes).
+Owner direction: **specification and documentation before implementation**. Active work is STACK/SPEC/CONTEXT and related baselines. No feature coding until the matching SPEC row is owner-approved. Security fixes still allowed if the owner asks.
