@@ -10,7 +10,7 @@ Do not put secrets here. Env var *names* and where they live are fine. Never log
 
 ## What this product is
 
-**My Number Health & Wellness Portal** — native mobile monorepo (iOS SwiftUI + Android Kotlin/Compose) for Japan My Number–related health & wellness flows. Platforms share contracts, not UI.
+**My Number Health & Wellness Portal** — client monorepo (iOS SwiftUI + Android Kotlin/Compose + **web React/Vite**) for Japan My Number–related health & wellness flows. Platforms share contracts, not UI.
 
 Repo: https://github.com/sunveda/health-app
 
@@ -27,33 +27,35 @@ Repo: https://github.com/sunveda/health-app
 
 - `apps/ios` — SwiftUI; Core adapters via composition root (NotConfigured for HealthKit, Keychain, biometrics, NFC, etc.)
 - `apps/android` — Kotlin + Jetpack Compose; platform adapters via composition root (NotConfigured for Health Connect, Keystore, BiometricPrompt, NFC, etc.)
+- `apps/web` — React + Vite + TypeScript; Core adapters via composition root (NotConfigured identity/clinical; **Unavailable** HealthKit/Health Connect/NFC)
 - `packages/contracts` — JSON Schemas; `packages/domain` — synthetic medical-expense eligibility fixtures
-- Docs: architecture, security, privacy, wellness/clinical baselines, release checklist, **STACK**, **SPEC**
+- Docs: architecture, security, privacy, wellness/clinical/**web** baselines, release checklist, **STACK**, **SPEC**
 - **Identity (My Number IdP):** deliberately **not wired** — blocked pending official provider docs, registration, compliance, threat-model review
 - Full version matrix: [STACK.md](STACK.md)
 
 ## Current status (2026-09-29)
 
-### Direction change — docs & specification first
+### Direction change — docs & specification first (+ web client)
 
-- Owner restart: **pause implementation**; prioritize documentation and specifications so the full stack is understandable from one screen ([STACK.md](STACK.md)) and work is tracked in [SPEC.md](SPEC.md). (#23)
-- Previous hold (2026-09-15, dual focus jkk-watch + Learn AI Now) is superseded for this repo’s **docs track**: CONTEXT + STACK + SPEC hygiene is the active work.
-- **Still no feature coding** (Identity, kits, clinical upload, backend) until the matching SPEC row is owner-approved.
-- Allowed PRs: STACK/SPEC/architecture/security/privacy drafts, CONTEXT updates, trivial AGENTS/README links, owner-requested security fixes.
-- Disallowed: inventing endpoints/scopes/credentials; new feature UI or kit wiring.
+- Owner restart: prioritize documentation and specifications ([STACK.md](STACK.md), [SPEC.md](SPEC.md)). (#23)
+- Owner add: **web app version** — specified in [web-baseline.md](web-baseline.md) and scaffolded under `apps/web` (fail-closed shell only). (#24)
+- Web tab screenshots captured into [web-screens.md](web-screens.md) / `docs/images/web/`.
+- **Still no Identity / kit / clinical / backend wiring** until the matching SPEC row is owner-approved.
+- Allowed PRs: STACK/SPEC/baselines, fail-closed client shells, CONTEXT updates, owner-requested security fixes.
+- Disallowed: inventing endpoints/scopes/credentials; real kit or IdP wiring.
 
 ### `main` (approx.)
 
 - Native app shells + Core/platform composition roots with NotConfigured adapters
+- Web shell (`apps/web`) — same fail-closed pattern (#24)
 - Security/privacy baseline docs and release checklist
 - Wellness / Clinical NotConfigured stubs (no real kit uploads / no clinical pipeline)
-- Production-readiness prep slices previously reviewed by CoE where applicable
 - **Identity still blocked**
 
 ### Spec writing order (active)
 
-1. Confirm S0 STACK with owner  
-2. S1 vision & non-goals → S2 IA/screens → S4/S5 security/privacy pass  
+1. Confirm S0 STACK + S16 web baseline with owner  
+2. S1 vision & non-goals → S2 IA/screens (all three clients) → S4/S5 security/privacy pass  
 3. Then contracts plan, backend sketch, Identity/Wellness/Clinical shells (still fail closed)
 
 ### Blockers before production path
@@ -74,6 +76,8 @@ Repo: https://github.com/sunveda/health-app
 
 - [STACK.md](STACK.md) — **one-screen tech map**
 - [SPEC.md](SPEC.md) — specification index & writing order
+- [web-baseline.md](web-baseline.md) — web capability matrix
+- [web-screens.md](web-screens.md) — web tab screenshots
 - [architecture.md](architecture.md)
 - [security.md](security.md)
 - [privacy-baseline.md](privacy-baseline.md)

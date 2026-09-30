@@ -19,7 +19,7 @@ This document turns the initial product specification into a staged architecture
 
 ## Mobile application structure
 
-The clients are native apps in a single monorepo: SwiftUI on iOS and Kotlin/Jetpack Compose on Android. There is no Expo or Expo Router app. Shared product contracts live in `packages/contracts`. `packages/domain` holds synthetic medical-expense eligibility fixtures and a platform-neutral placeholder engine (not tax-law guidance; native apps do not import it at runtime). `packages/api` remains reserved (README-only) until transport clients are designed.
+The clients live in a single monorepo: SwiftUI on iOS, Kotlin/Jetpack Compose on Android, and React/Vite on web. There is no Expo or Expo Router app. Platforms share **contracts**, not UI. Shared product contracts live in `packages/contracts`. `packages/domain` holds synthetic medical-expense eligibility fixtures and a platform-neutral placeholder engine (not tax-law guidance; clients do not import it at runtime). `packages/api` remains reserved (README-only) until transport clients are designed.
 
 ```text
 apps/ios/
@@ -35,13 +35,17 @@ apps/android/
     platform/           # Platform interfaces, NotConfigured/Unavailable stubs, composition root, privacy, wellness, and clinical helpers
     features/           # Tab shells (home, health, expenses, settings)
   app/src/test/         # JVM unit tests of mapping helpers and adapter stubs
-packages/contracts/     # Live JSON Schemas shared by both clients
+apps/web/
+  src/
+    main.tsx / App.tsx  # React entry; constructs the composition root once
+    core/               # Adapters, NotConfigured/Unavailable stubs, composition root
+    features/           # Tab shells (home, health, expenses, settings)
+packages/contracts/     # Live JSON Schemas shared by all clients
 packages/domain/        # Synthetic expense-eligibility fixtures + pure tests
 packages/api/           # Reserved — no networking clients yet
 ```
 
-A platform adapter must expose capability availability, permission state, read scope, and failure state. Screens and feature modules must never import or call HealthKit, Health Connect, NFC, biometrics, or secure-storage APIs directly. Capability access is only through Core/platform adapters constructed by a single composition root. This keeps platform-specific behavior testable and prevents accidental permission escalation.
-
+A platform adapter must expose capability availability, permission state, read scope, and failure state. Screens and feature modules must never import or call HealthKit, Health Connect, NFC, biometrics, secure-storage, WebAuthn, or browser credential APIs directly. Capability access is only through Core/platform adapters constructed by a single composition root. Web treats device health kits and NFC as **Unavailable** ([web-baseline.md](web-baseline.md)). This keeps platform-specific behavior testable and prevents accidental permission escalation.
 Today those adapters are NotConfigured (and Unavailable) stubs: they return explicit unavailable states and do not request permissions or touch device kits. Stage 1.5 adds the same pattern for `ConsentStore`, `CrashReporter`, and `TelemetryPolicy` (no persistence of sensitive consent payloads, no crash SDK, no telemetry send). Wellness deepens `HealthDataSource` (availability, permission state, read scope, failure) and adds `WellnessSyncClient` behind a disabled feature flag — still NotConfigured, still no HealthKit or Health Connect calls. Clinical adds `ClinicalDocumentPipeline`, `ReportUploadClient`, `FileValidation`, and `QuarantineStore` — still NotConfigured, still no document picker, network upload, or file pipeline. Real HealthKit, Health Connect, Keychain, Keystore, LocalAuthentication, BiometricPrompt, CoreNFC, document-picker, and upload implementations may be added later only inside the Core/platform adapter paths, and only the composition root may construct them. CI greps for concrete `NotConfigured*` / `Unavailable*` / `InMemory*` constructors outside `CompositionRoot` and unit tests.
 
 ## Signing & release placeholders
