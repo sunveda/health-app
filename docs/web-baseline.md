@@ -42,3 +42,7 @@ The product shares **contracts**, not UI. Web is a first-class portal surface fo
 - Emulating HealthKit or Health Connect in the browser
 - Shipping a marketing landing page as the product shell
 - Guessing My Number web SSO endpoints or scopes
+
+## Screenshots
+
+Current shell UI for all tabs: [web-screens.md](web-screens.md) (images under `docs/images/web/`).

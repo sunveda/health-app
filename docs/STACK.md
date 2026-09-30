@@ -145,6 +145,7 @@ All sensitive capabilities go through **Core / platform adapters** built only by
 | [CONTEXT.md](CONTEXT.md) | Living status / owners / blockers |
 | [architecture.md](architecture.md) | Boundaries, layout, stages |
 | [web-baseline.md](web-baseline.md) | Web capability matrix |
+| [web-screens.md](web-screens.md) | Web tab screenshots |
 | [security.md](security.md) · [privacy-baseline.md](privacy-baseline.md) | Threat & privacy posture |
 | [wellness-baseline.md](wellness-baseline.md) · [clinical-baseline.md](clinical-baseline.md) | Kit / upload intent |
 | [release-checklist.md](release-checklist.md) | Store / signing prerequisites |

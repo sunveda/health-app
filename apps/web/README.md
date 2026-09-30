@@ -17,6 +17,18 @@ pnpm --filter @health-app/web test
 pnpm --filter @health-app/web build
 ```
 
+## Screenshots
+
+Documented tab captures: [`docs/web-screens.md`](../../docs/web-screens.md).
+
+Regenerate (preview must be running on port 4173):
+
+```bash
+pnpm --filter @health-app/web build
+pnpm --filter @health-app/web preview --host 127.0.0.1 --port 4173
+node scripts/capture-web-screenshots.mjs
+```
+
 ## Identity & privacy
 
 Do not invent My Number IdP endpoints or put tokens in `localStorage`. Env var *names* match the root `.env.example` when wiring is approved.

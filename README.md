@@ -46,6 +46,7 @@ As of **2026-09-29**, the active track is **docs & specification** ([STACK.md](d
 - [**SPEC (specification index)**](docs/SPEC.md)
 - [**CONTEXT (living handoff)**](docs/CONTEXT.md)
 - [`docs/web-baseline.md`](docs/web-baseline.md)
+- [`docs/web-screens.md`](docs/web-screens.md) — web tab screenshots
 - [`docs/architecture.md`](docs/architecture.md)
 - [`docs/security.md`](docs/security.md)
 - [`docs/privacy-baseline.md`](docs/privacy-baseline.md)

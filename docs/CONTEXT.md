@@ -39,6 +39,7 @@ Repo: https://github.com/sunveda/health-app
 
 - Owner restart: prioritize documentation and specifications ([STACK.md](STACK.md), [SPEC.md](SPEC.md)). (#23)
 - Owner add: **web app version** — specified in [web-baseline.md](web-baseline.md) and scaffolded under `apps/web` (fail-closed shell only). (#24)
+- Web tab screenshots captured into [web-screens.md](web-screens.md) / `docs/images/web/`.
 - **Still no Identity / kit / clinical / backend wiring** until the matching SPEC row is owner-approved.
 - Allowed PRs: STACK/SPEC/baselines, fail-closed client shells, CONTEXT updates, owner-requested security fixes.
 - Disallowed: inventing endpoints/scopes/credentials; real kit or IdP wiring.
@@ -76,6 +77,7 @@ Repo: https://github.com/sunveda/health-app
 - [STACK.md](STACK.md) — **one-screen tech map**
 - [SPEC.md](SPEC.md) — specification index & writing order
 - [web-baseline.md](web-baseline.md) — web capability matrix
+- [web-screens.md](web-screens.md) — web tab screenshots
 - [architecture.md](architecture.md)
 - [security.md](security.md)
 - [privacy-baseline.md](privacy-baseline.md)

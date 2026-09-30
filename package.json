@@ -7,9 +7,11 @@
     "typecheck": "pnpm -r typecheck",
     "test": "pnpm -r test",
     "format": "prettier --write .",
-    "format:check": "prettier --check ."
+    "format:check": "prettier --check .",
+    "docs:web-screens": "node scripts/capture-web-screenshots.mjs"
   },
   "devDependencies": {
+    "playwright": "1.49.1",
     "prettier": "^3.6.2",
     "typescript": "^5.9.2"
   }
