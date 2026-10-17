@@ -2,6 +2,16 @@
 
 A native mobile monorepo for the iOS and Android clients of the My Number Health & Wellness Portal. The repository keeps the two applications separate so each platform can use its native security, health-data, NFC, and accessibility APIs while sharing product contracts and architecture decisions.
 
+## Agent / handoff context
+
+**Start here:**
+
+1. [docs/STACK.md](docs/STACK.md) — **one-screen stack** (every technology and boundary)
+2. [docs/SPEC.md](docs/SPEC.md) — specification index (docs-first writing order)
+3. [docs/CONTEXT.md](docs/CONTEXT.md) — living status for any agent or human
+
+Update CONTEXT **daily while this repo is active**, and on every major direction change (SunVeda rule for all projects). Also: [AGENTS.md](AGENTS.md)
+
 ## Repository layout
 
 | Path | Responsibility |
@@ -9,7 +19,7 @@ A native mobile monorepo for the iOS and Android clients of the My Number Health
 | `apps/ios` | Native SwiftUI iOS application and platform adapters |
 | `apps/android` | Native Kotlin and Jetpack Compose Android application and platform adapters |
 | `packages/contracts` | Platform-neutral JSON Schemas for API and domain boundaries |
-| `packages/domain` | Reserved for pure shared business rules and calculation fixtures |
+| `packages/domain` | Platform-neutral synthetic medical-expense eligibility fixtures and tests |
 | `packages/api` | Reserved for versioned backend transport contracts |
 | `docs` | Architecture, security, privacy, and delivery decisions |
 
@@ -23,7 +33,29 @@ The applications share **contracts**, not UI code. This avoids a lowest-common-d
 
 ## Current status
 
-The repository contains native application shells, a Core/platform composition root with NotConfigured adapters, shared contract schemas, and security documentation. The My Number identity-provider integration, HealthKit and Health Connect permissions, NFC reader support, secure upload pipeline, backend services, and Vertex AI workflows are deliberately not wired to guessed endpoints or credentials. Those integrations require official provider documentation, app registration, compliance approval, and threat-model review.
+See [docs/CONTEXT.md](docs/CONTEXT.md) for living handoff detail (blockers, owners).
+
+The repository contains native application shells, a Core/platform composition root with NotConfigured adapters (including consent, crash reporting, telemetry policy, wellness sync, and clinical upload/review stubs), shared contract schemas, synthetic domain eligibility fixtures, and security/privacy baseline documentation. The My Number identity-provider integration, HealthKit and Health Connect permissions, NFC reader support, secure upload pipeline, backend services, and AI workflows (deferred to post-MVP) are deliberately not wired to guessed endpoints or credentials. Those integrations require official provider documentation, app registration, compliance approval, and threat-model review.
+
+As of **2026-09-29**, the active track is **docs & specification** ([STACK.md](docs/STACK.md), [SPEC.md](docs/SPEC.md)) — not feature implementation. Specialist bot: **Health App**. Coordinate via Chief of Staff / Chief of Engineering.
+
+## Docs
+
+- [**STACK (one-screen tech map)**](docs/STACK.md)
+- [**SPEC (specification index)**](docs/SPEC.md)
+- [**CONTEXT (living handoff)**](docs/CONTEXT.md)
+- [`docs/product-spec.md`](docs/product-spec.md), [`docs/technical-spec.md`](docs/technical-spec.md), [`docs/mvp-screens.md`](docs/mvp-screens.md) (draft)
+- [`docs/architecture.md`](docs/architecture.md)
+- [`docs/architecture/system-architecture.md`](docs/architecture/system-architecture.md) (diagrams, module design), [`data-model.md`](docs/architecture/data-model.md), [`api-contracts.md`](docs/architecture/api-contracts.md)
+- [`docs/architecture/hosting-and-compliance.md`](docs/architecture/hosting-and-compliance.md) (Vercel + Neon facts, residency, legal review items)
+- [`docs/security/threat-model.md`](docs/security/threat-model.md)
+- [`docs/adr/`](docs/adr/README.md) (architecture decision records)
+- [`docs/development.md`](docs/development.md) (dev & test guide)
+- [`docs/security.md`](docs/security.md)
+- [`docs/privacy-baseline.md`](docs/privacy-baseline.md)
+- [`docs/wellness-baseline.md`](docs/wellness-baseline.md)
+- [`docs/clinical-baseline.md`](docs/clinical-baseline.md)
+- [`docs/release-checklist.md`](docs/release-checklist.md)
 
 ## Working locally
 
@@ -38,5 +70,3 @@ Open `apps/android` in Android Studio and sync the Gradle project. The current t
 ## Security principles
 
 The application follows data minimization, explicit consent, least privilege, zero-trust service boundaries, encrypted storage, and auditable access. Sensitive identity and health data must be excluded from logs and analytics by default. Any implementation of My Number Card authentication must use the official Japanese identity-provider documentation and a security review; the specification’s example scopes and flows are not treated as proof that a production endpoint or permission is available.
-
-See [`docs/architecture.md`](docs/architecture.md) and [`docs/security.md`](docs/security.md) for the current design boundaries and open decisions.

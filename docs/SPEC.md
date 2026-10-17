@@ -1,0 +1,105 @@
+# Product specification index
+
+**Mode:** Docs & specification before implementation.  
+**Audience:** Product owner, CoE, Health App bot, any agent picking up the repo.  
+**Companion:** [STACK.md](STACK.md) — every technology on one screen.
+
+This file is the **table of contents for what we will specify**. It does not invent My Number endpoints, scopes, credentials, HealthKit/Health Connect permission strings, or production URLs. Where a topic is blocked on official provider docs or legal review, the status is **Blocked**, not TBD-with-a-guess.
+
+---
+
+## How to use this index
+
+1. Open [STACK.md](STACK.md) for the tech map.
+2. Use the tables below to see which specs exist, which need drafting, and what blocks coding.
+3. New feature code stays **out of scope** until the matching row is **Owner-approved**.
+4. After each approved spec slice, update [CONTEXT.md](CONTEXT.md) and link the PR.
+
+---
+
+## Specification catalog
+
+| ID | Spec | Purpose | Status | Source of truth today |
+|---|---|---|---|---|
+| S0 | Stack & boundaries | One-screen tech + system map | **Draft** | [STACK.md](STACK.md), [architecture.md](architecture.md) |
+| S1 | Product vision & non-goals | Who it is for, what we refuse to build | **Draft** | [product-spec.md](product-spec.md) |
+| S2 | Information architecture | Screens, tabs, empty/error/blocked states | **Draft** | [mvp-screens.md](mvp-screens.md) |
+| S2b | Technical specification | Layout, adapters, built-vs-stub, staging, CI gates | **Draft** | [technical-spec.md](technical-spec.md) |
+| S3 | Shared contracts | JSON Schema for portal payloads | **Scaffold** | `packages/contracts/schemas/portal.json` |
+| S4 | Security & threat model | Controls, checklist, fail-closed rules | **Baseline draft** | [security.md](security.md) |
+| S5 | Privacy & data classification | Categories, device boundary, logging | **Baseline draft** | [privacy-baseline.md](privacy-baseline.md) |
+| S6 | Identity (My Number IdP) | OIDC/PKCE, storage, pairwise sub | **Blocked** | architecture + security notes; no official wiring |
+| S7 | Wellness (device health) | Scopes, consent UX, sync flag | **Intent only** | [wellness-baseline.md](wellness-baseline.md) |
+| S8 | Clinical documents | Upload → validate → quarantine → review | **Intent only** | [clinical-baseline.md](clinical-baseline.md) |
+| S9 | Medical expenses | Eligibility rules, export confirmation | **Fixtures only** | `packages/domain` (synthetic; not tax law) |
+| S10 | AI insights | Grounding, provenance, disclaimers | **Deferred** to post-MVP; revisit only if free ([ADR-0012](adr/0012-ai-deferred.md)) | architecture AI boundary |
+| S11 | Backend services | Vercel Functions BFF/API, Neon Postgres, private storage, field encryption | **Target sketch** (GCP plan superseded) | [ADR-0011](adr/0011-hosting-vercel-neon.md), [hosting-and-compliance](architecture/hosting-and-compliance.md) |
+| S12 | Release & stores | Signing, TestFlight, Play internal | **Checklist** | [release-checklist.md](release-checklist.md) |
+| S13 | Observability & IR | Crash/telemetry policy, incident response | **Partial** | privacy crash decision; IR TBD |
+| S14 | Accessibility & i18n | JP-first copy, a11y acceptance | **Needs draft** | — |
+| S15 | Testing & CI gates | Required checks per stage | **Partial** | `.github/workflows/native-ci.yml`, [development.md](development.md) |
+| S16 | System architecture | Context, components, data flows, module design, platform limits | **Draft** | [architecture/system-architecture.md](architecture/system-architecture.md) |
+| S17 | Data model | Entities, classification, device/backend partition, retention | **Draft** | [architecture/data-model.md](architecture/data-model.md) |
+| S18 | API contracts | Contract-level planned services, error model, versioning | **Draft** (planned; IdP **Blocked**) | [architecture/api-contracts.md](architecture/api-contracts.md) |
+| S19 | Threat model | STRIDE per component/flow, web controls, residual risk | **Draft** | [security/threat-model.md](security/threat-model.md) |
+| S20 | ADRs | Decision records | **Draft** | [adr/README.md](adr/README.md) |
+| S21 | Developer & test guide | Prereqs, commands, gates, PR workflow | **Draft** | [development.md](development.md) |
+| S22 | Web client (apps/web) | TypeScript web app, BFF, parity with native; web platform limits | **Stack approved 2026-10-17** (Next.js + BFF); planned, not started; clinical upload in MVP; auth per [ADR-0010](adr/0010-web-auth-strategy.md) | [ADR-0008](adr/0008-web-client-stack.md), [ADR-0009](adr/0009-web-session-and-token-handling.md), [system-architecture §5.4, §8](architecture/system-architecture.md) |
+| S23 | Hosting, residency & compliance | Vercel + Neon facts, cost, legal review list, gates before real data | **Draft** | [architecture/hosting-and-compliance.md](architecture/hosting-and-compliance.md), [ADR-0011](adr/0011-hosting-vercel-neon.md) |
+
+Status legend: **Needs draft** → **Draft** → **Owner-approved** → **Ready to implement**. **Blocked** cannot move to implement without external approval.
+
+---
+
+## Writing order (docs-first restart)
+
+Work top-down. Do not skip S6/S7/S8 into “implementation notes” that invent APIs.
+
+| Order | Deliverable | Exit criteria |
+|---|---|---|
+| 1 | **S0** Stack freeze | Owner confirms STACK.md matches intended product |
+| 2 | **S1** Vision & non-goals | Explicit out-of-scope list (no other SunVeda products, no guessed IdP) |
+| 3 | **S2** IA / screen inventory | Every tab + blocked Identity/Clinical empty states described |
+| 4 | **S4 + S5** Security/privacy pass | Owner + CoE acknowledge baseline; legal TODOs listed |
+| 5 | **S3** Contract expansion plan | Which schemas grow before each stage (no fake fields) |
+| 6 | **S11** Backend service sketch | Service list + data partitions; still no live projects |
+| 7 | **S6** Identity spec shell | Placeholders for issuer/client/redirect; fill only from official docs |
+| 8 | **S7 / S8** Wellness & clinical | Purpose-tied scopes and pipeline stages; kits still off |
+| 9 | **S9 / S10** Expenses & AI | Rules provenance; AI safety copy |
+| 10 | **S12–S15** Release, a11y, CI | Checklists ready before any store build |
+
+---
+
+## Hard constraints (every spec must honor)
+
+- Fail closed: Identity, clinical upload, and kit reads stay unavailable until officially approved.
+- Composition root only: HealthKit, Health Connect, NFC, Keychain, Keystore, biometrics never imported from feature screens.
+- No invented endpoints, OIDC scopes, certificate flows, or scanner vendors.
+- Synthetic fixtures only in git; no real My Number, health payloads, or credentials.
+- AI output is advisory; show sources, timestamps, uncertainty; never diagnose.
+- Individual number is not a general-purpose client identifier.
+
+---
+
+## Open questions for the owner
+
+Capture answers in CONTEXT when decided; do not encode guesses into schemas.
+
+1. Primary launch language(s) and region assumptions beyond Japan My Number context?
+2. Which store tracks first (TestFlight vs Play internal) and account ownership?
+3. ~~Is Vertex AI in scope for v1?~~ **Decided 2026-10-17: deferred to post-MVP; revisit only if free** ([ADR-0012](adr/0012-ai-deferred.md)).
+4. Must the individual number ever appear on-device, or pairwise-sub only?
+5. Expense feature: informational eligibility only, or export toward a specific tax workflow?
+
+---
+
+## Related
+
+- [product-spec.md](product-spec.md), [technical-spec.md](technical-spec.md), [mvp-screens.md](mvp-screens.md) — draft specs
+- [architecture/](architecture/system-architecture.md), [security/threat-model.md](security/threat-model.md), [adr/](adr/README.md), [development.md](development.md) — architecture & design set
+- [CONTEXT.md](CONTEXT.md) — living status  
+- [STACK.md](STACK.md) — tech one-pager  
+- [architecture.md](architecture.md) — staged delivery  
+- Root [AGENTS.md](../AGENTS.md) — agent operating rules  
+
+*Last updated: 2026-10-17 (owner decisions on web stack, auth, hosting, AI applied)*

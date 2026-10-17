@@ -1,0 +1,203 @@
+{
+  "meta": {
+    "kind": "synthetic-fixtures",
+    "notRealRecords": true,
+    "disclaimer": "Synthetic product fixtures only. Not real patients, clinics, receipts, identity documents, or tax filings. Eligibility rules in packages/domain are engineering placeholders and are not Japanese tax-law guidance. Legal thresholds and official category mapping are TODO for product/tax counsel."
+  },
+  "eligibleCategories": [
+    "consultation",
+    "prescription",
+    "inpatient",
+    "dental_treatment"
+  ],
+  "ineligibleCategories": ["otc_supplement", "cosmetic"],
+  "cases": [
+    {
+      "id": "SYNTH-CASE-documented-consultation",
+      "taxYear": 2024,
+      "lines": [
+        {
+          "id": "SYNTH-LINE-001",
+          "category": "consultation",
+          "amountJpy": 15000,
+          "reimbursedJpy": 3000,
+          "documented": true,
+          "payeeLabel": "Fixture Clinic Alpha"
+        }
+      ],
+      "expected": {
+        "eligibleAmountJpy": 12000,
+        "calculationStatus": "ready_for_export",
+        "reviewReasons": [],
+        "contributingLineIds": ["SYNTH-LINE-001"]
+      }
+    },
+    {
+      "id": "SYNTH-CASE-otc-ineligible",
+      "taxYear": 2024,
+      "lines": [
+        {
+          "id": "SYNTH-LINE-002",
+          "category": "otc_supplement",
+          "amountJpy": 4800,
+          "reimbursedJpy": 0,
+          "documented": true,
+          "payeeLabel": "Fixture Pharmacy Beta"
+        }
+      ],
+      "expected": {
+        "eligibleAmountJpy": 0,
+        "calculationStatus": "not_available",
+        "reviewReasons": [],
+        "contributingLineIds": []
+      }
+    },
+    {
+      "id": "SYNTH-CASE-undocumented-consultation",
+      "taxYear": 2024,
+      "lines": [
+        {
+          "id": "SYNTH-LINE-003",
+          "category": "consultation",
+          "amountJpy": 8000,
+          "reimbursedJpy": 0,
+          "documented": false,
+          "payeeLabel": "Fixture Clinic Alpha"
+        }
+      ],
+      "expected": {
+        "eligibleAmountJpy": 0,
+        "calculationStatus": "review_required",
+        "reviewReasons": ["undocumented"],
+        "contributingLineIds": []
+      }
+    },
+    {
+      "id": "SYNTH-CASE-mixed-documented-and-review",
+      "taxYear": 2024,
+      "lines": [
+        {
+          "id": "SYNTH-LINE-004",
+          "category": "prescription",
+          "amountJpy": 6200,
+          "reimbursedJpy": 200,
+          "documented": true,
+          "payeeLabel": "Fixture Pharmacy Beta"
+        },
+        {
+          "id": "SYNTH-LINE-005",
+          "category": "consultation",
+          "amountJpy": 9000,
+          "reimbursedJpy": 0,
+          "documented": false,
+          "payeeLabel": "Fixture Clinic Gamma"
+        }
+      ],
+      "expected": {
+        "eligibleAmountJpy": 6000,
+        "calculationStatus": "review_required",
+        "reviewReasons": ["undocumented"],
+        "contributingLineIds": ["SYNTH-LINE-004"]
+      }
+    },
+    {
+      "id": "SYNTH-CASE-over-reimbursed",
+      "taxYear": 2024,
+      "lines": [
+        {
+          "id": "SYNTH-LINE-006",
+          "category": "inpatient",
+          "amountJpy": 10000,
+          "reimbursedJpy": 15000,
+          "documented": true,
+          "payeeLabel": "Fixture Ward North"
+        }
+      ],
+      "expected": {
+        "eligibleAmountJpy": 0,
+        "calculationStatus": "review_required",
+        "reviewReasons": ["over_reimbursed"],
+        "contributingLineIds": []
+      }
+    },
+    {
+      "id": "SYNTH-CASE-unknown-category",
+      "taxYear": 2024,
+      "lines": [
+        {
+          "id": "SYNTH-LINE-007",
+          "category": "unspecified_fixture_bucket",
+          "amountJpy": 2500,
+          "reimbursedJpy": 0,
+          "documented": true,
+          "payeeLabel": "Fixture Payee Delta"
+        }
+      ],
+      "expected": {
+        "eligibleAmountJpy": 0,
+        "calculationStatus": "review_required",
+        "reviewReasons": ["unknown_category"],
+        "contributingLineIds": []
+      }
+    },
+    {
+      "id": "SYNTH-CASE-negative-amount",
+      "taxYear": 2024,
+      "lines": [
+        {
+          "id": "SYNTH-LINE-008",
+          "category": "dental_treatment",
+          "amountJpy": -100,
+          "reimbursedJpy": 0,
+          "documented": true,
+          "payeeLabel": "Fixture Dental East"
+        }
+      ],
+      "expected": {
+        "eligibleAmountJpy": 0,
+        "calculationStatus": "review_required",
+        "reviewReasons": ["negative_amount"],
+        "contributingLineIds": []
+      }
+    },
+    {
+      "id": "SYNTH-CASE-ineligible-does-not-block",
+      "taxYear": 2024,
+      "lines": [
+        {
+          "id": "SYNTH-LINE-009",
+          "category": "cosmetic",
+          "amountJpy": 40000,
+          "reimbursedJpy": 0,
+          "documented": true,
+          "payeeLabel": "Fixture Studio Epsilon"
+        },
+        {
+          "id": "SYNTH-LINE-010",
+          "category": "dental_treatment",
+          "amountJpy": 22000,
+          "reimbursedJpy": 2000,
+          "documented": true,
+          "payeeLabel": "Fixture Dental East"
+        }
+      ],
+      "expected": {
+        "eligibleAmountJpy": 20000,
+        "calculationStatus": "ready_for_export",
+        "reviewReasons": [],
+        "contributingLineIds": ["SYNTH-LINE-010"]
+      }
+    },
+    {
+      "id": "SYNTH-CASE-empty",
+      "taxYear": 2024,
+      "lines": [],
+      "expected": {
+        "eligibleAmountJpy": 0,
+        "calculationStatus": "not_available",
+        "reviewReasons": [],
+        "contributingLineIds": []
+      }
+    }
+  ]
+}

@@ -15,6 +15,11 @@ ADAPTER_ALLOWLIST_PREFIXES = (
     "apps/android/app/src/main/java/com/sunveda/healthapp/platform/",
 )
 
+CONSTRUCTOR_ALLOWED_PATHS = (
+    "apps/ios/HealthApp/Core/CompositionRoot.swift",
+    "apps/android/app/src/main/java/com/sunveda/healthapp/platform/CompositionRoot.kt",
+)
+
 CODE_SUFFIXES = (
     ".swift",
     ".kt",
@@ -24,6 +29,11 @@ CODE_SUFFIXES = (
     ".mm",
     ".h",
     ".gradle",
+    ".plist",
+    ".entitlements",
+    ".xml",
+    ".yml",
+    ".yaml",
 )
 
 SKIP_PATH_PREFIXES = (
@@ -31,6 +41,7 @@ SKIP_PATH_PREFIXES = (
 )
 
 CHECKER_RELATIVE = "scripts/check-forbidden-patterns.py"
+WEB_CHECKER_RELATIVE = "scripts/check-web-patterns.py"  # holds token-prefix regexes by design
 
 EXPO_PUBLIC = re.compile(r"EXPO_PUBLIC_")
 PEM_HEADER = re.compile(r"-----BEGIN (?:[A-Z0-9]+ )?PRIVATE KEY-----")
@@ -43,15 +54,47 @@ OBVIOUS_TOKEN = re.compile(
 )
 
 KIT_PATTERNS = (
-    ("HealthKit import/usage", re.compile(r"(?m)^\s*import HealthKit\b|\bHKHealthStore\b")),
+    (
+        "HealthKit import/usage",
+        re.compile(
+            r"(?m)^\s*import HealthKit\b|"
+            r"\bHKHealthStore\b|"
+            r"\bHKSampleQuery\b|"
+            r"\bHKAnchoredObjectQuery\b|"
+            r"\bHKStatisticsQuery\b|"
+            r"\bHKObserverQuery\b|"
+            r"\bHKWorkoutSession\b|"
+            r"HealthKit\.framework|"
+            r"com\.apple\.developer\.healthkit|"
+            r"\bNSHealthShareUsageDescription\b|"
+            r"\bNSHealthUpdateUsageDescription\b"
+        ),
+    ),
     ("CoreNFC import/usage", re.compile(r"(?m)^\s*import CoreNFC\b|\bNFCTagReaderSession\b|\bNFCNDEFReaderSession\b")),
     (
         "LocalAuthentication import/usage",
         re.compile(r"(?m)^\s*import LocalAuthentication\b|\bLAContext\b"),
     ),
     (
+        "Security/Keychain import/usage",
+        re.compile(
+            r"(?m)^\s*import Security\b|"
+            r"\bSecItem(?:Add|CopyMatching|Update|Delete)?\b|"
+            r"\bSecAccessControl\w*|"
+            r"\bkSec(?:Class|ValueData|AttrAccessible)\w*"
+        ),
+    ),
+    (
         "Health Connect import/usage",
-        re.compile(r"androidx\.health\.connect\b|\bHealthConnectClient\b"),
+        re.compile(
+            r"androidx\.health\.connect\b|"
+            r"android\.health\.connect\b|"
+            r"\bHealthConnectClient\b|"
+            r"\bHealthConnectManager\b|"
+            r"\bReadRecordsRequest\b|"
+            r"\bHealthPermission\b|"
+            r"android\.permission\.health\."
+        ),
     ),
     (
         "BiometricPrompt import/usage",
@@ -65,6 +108,63 @@ KIT_PATTERNS = (
         "Android NFC API usage",
         re.compile(r"(?m)^\s*import android\.nfc\b|\bNfcAdapter\b"),
     ),
+    (
+        "iOS document/photo picker",
+        re.compile(
+            r"\bUIDocumentPickerViewController\b|"
+            r"\bUIDocumentPickerDelegate\b|"
+            r"\bUIDocumentBrowserViewController\b|"
+            r"\bPHPickerViewController\b|"
+            r"\bUIImagePickerController\b|"
+            r"\bNSPhotoLibraryUsageDescription\b|"
+            r"\bNSPhotoLibraryAddUsageDescription\b"
+        ),
+    ),
+    (
+        "Android document/photo picker",
+        re.compile(
+            r"ActivityResultContracts\.(?:GetContent|OpenDocument|OpenMultipleDocuments|PickVisualMedia)\b|"
+            r"\bACTION_(?:GET_CONTENT|OPEN_DOCUMENT|OPEN_DOCUMENT_TREE)\b|"
+            r"android\.permission\.READ_MEDIA_IMAGES\b|"
+            r"android\.permission\.READ_MEDIA_VISUAL_USER_SELECTED\b"
+        ),
+    ),
+    (
+        "AWS / GCP / Firebase upload SDK",
+        re.compile(
+            r"(?m)^\s*import AWSS3\b|"
+            r"\bAWSS3TransferUtility\b|"
+            r"\bAmazonS3Client\b|"
+            r"\bAWSS3StoragePlugin\b|"
+            r"com\.amazonaws\.(?:mobileconnectors|services)\.s3\b|"
+            r"software\.amazon\.awssdk\.services\.s3\b|"
+            r"com\.amazonaws:aws-android-sdk-s3\b|"
+            r"software\.amazon\.awssdk:s3\b|"
+            r"amplifyframework:aws-storage|"
+            r"com\.google\.cloud\.storage\b|"
+            r"com\.google\.cloud:google-cloud-storage\b|"
+            r"com\.google\.firebase\.storage\b|"
+            r"com\.google\.firebase:firebase-storage\b|"
+            r"^\s*import FirebaseStorage\b|"
+            r"\bFirebaseStorage\b"
+        ),
+    ),
+    (
+        "Hardcoded object-storage upload URL",
+        re.compile(
+            r"https?://[^\"'\s]*storage\.googleapis\.com|"
+            r"https?://[^\"'\s]*storage\.cloud\.google\.com|"
+            r"https?://s3\.amazonaws\.com|"
+            r"https?://s3[.-][a-z0-9-]+\.amazonaws\.com|"
+            r"https?://[^\"'\s]*\.s3[.-][a-z0-9-]*\.amazonaws\.com|"
+            r"https?://[^\"'\s]*firebasestorage\.googleapis\.com|"
+            r"https?://[^\"'\s]*\.blob\.core\.windows\.net"
+        ),
+    ),
+)
+
+ADAPTER_CONSTRUCTOR = re.compile(
+    r"\b(?:NotConfigured|Unavailable|InMemory)[A-Za-z0-9]+\s*\("
 )
 
 
@@ -86,6 +186,20 @@ def is_adapter_path(path: str) -> bool:
     return path.startswith(ADAPTER_ALLOWLIST_PREFIXES)
 
 
+def is_unit_test_path(path: str) -> bool:
+    return (
+        path.startswith("apps/ios/HealthAppTests/")
+        or "/src/test/" in path
+        or path.endswith("Tests.swift")
+        or path.endswith("Test.kt")
+        or path.endswith("Tests.kt")
+    )
+
+
+def is_constructor_allowed(path: str) -> bool:
+    return path in CONSTRUCTOR_ALLOWED_PATHS or is_unit_test_path(path)
+
+
 def read_text(path: str) -> str | None:
     full = ROOT / path
     try:
@@ -104,7 +218,7 @@ def main() -> int:
         if text is None:
             continue
 
-        if path != CHECKER_RELATIVE:
+        if path not in (CHECKER_RELATIVE, WEB_CHECKER_RELATIVE):
             for match in EXPO_PUBLIC.finditer(text):
                 line = text.count("\n", 0, match.start()) + 1
                 violations.append(f"{path}:{line}: forbidden Expo public env prefix EXPO_PUBLIC_")
@@ -113,7 +227,7 @@ def main() -> int:
             line = text.count("\n", 0, match.start()) + 1
             violations.append(f"{path}:{line}: private key PEM header")
 
-        if path != CHECKER_RELATIVE:
+        if path not in (CHECKER_RELATIVE, WEB_CHECKER_RELATIVE):
             for match in TOKEN_ASSIGNMENT.finditer(text):
                 line = text.count("\n", 0, match.start()) + 1
                 violations.append(f"{path}:{line}: obvious secret assignment")
@@ -121,12 +235,19 @@ def main() -> int:
                 line = text.count("\n", 0, match.start()) + 1
                 violations.append(f"{path}:{line}: obvious token material")
 
-        if path.endswith(CODE_SUFFIXES) and not is_adapter_path(path) and path != CHECKER_RELATIVE:
-            for label, pattern in KIT_PATTERNS:
-                for match in pattern.finditer(text):
+        if path.endswith(CODE_SUFFIXES) and path not in (CHECKER_RELATIVE, WEB_CHECKER_RELATIVE):
+            if not is_adapter_path(path):
+                for label, pattern in KIT_PATTERNS:
+                    for match in pattern.finditer(text):
+                        line = text.count("\n", 0, match.start()) + 1
+                        violations.append(
+                            f"{path}:{line}: {label} outside Core/platform adapter allowlist"
+                        )
+            if not is_constructor_allowed(path):
+                for match in ADAPTER_CONSTRUCTOR.finditer(text):
                     line = text.count("\n", 0, match.start()) + 1
                     violations.append(
-                        f"{path}:{line}: {label} outside Core/platform adapter allowlist"
+                        f"{path}:{line}: concrete adapter constructed outside CompositionRoot"
                     )
 
     if violations:

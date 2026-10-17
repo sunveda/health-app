@@ -76,10 +76,44 @@ struct UnavailableBiometricUnlock: BiometricUnlock {
 
 struct NotConfiguredHealthDataSource: HealthDataSource {
     let status = CapabilityStatus.notConfigured
+    let permissionState = HealthPermissionState.notConfigured
+    let grantedReadScopes: Set<WellnessReadScope> = []
+    let lastFailure: CapabilityError? = .notConfigured
+
+    func requestReadAccess(scopes _: Set<WellnessReadScope>) -> Result<Void, CapabilityError> {
+        .failure(.notConfigured)
+    }
 }
 
 struct UnavailableHealthDataSource: HealthDataSource {
     let status = CapabilityStatus.unavailable
+    let permissionState = HealthPermissionState.unavailable
+    let grantedReadScopes: Set<WellnessReadScope> = []
+    let lastFailure: CapabilityError? = .unavailable
+
+    func requestReadAccess(scopes _: Set<WellnessReadScope>) -> Result<Void, CapabilityError> {
+        .failure(.unavailable)
+    }
+}
+
+struct NotConfiguredWellnessSyncClient: WellnessSyncClient {
+    let featureFlag = WellnessFeatureFlag.disabled
+    let status = CapabilityStatus.notConfigured
+    let lastSyncedAt: Date? = nil
+
+    func sync() -> Result<Void, CapabilityError> {
+        .failure(.notConfigured)
+    }
+}
+
+struct UnavailableWellnessSyncClient: WellnessSyncClient {
+    let featureFlag = WellnessFeatureFlag.disabled
+    let status = CapabilityStatus.unavailable
+    let lastSyncedAt: Date? = nil
+
+    func sync() -> Result<Void, CapabilityError> {
+        .failure(.unavailable)
+    }
 }
 
 struct NotConfiguredNfcCapability: NfcCapability {
@@ -103,5 +137,184 @@ struct UnavailableIdentitySession: IdentitySession {
 
     func pairwiseSubject() -> String? {
         nil
+    }
+}
+
+struct NotConfiguredConsentStore: ConsentStore {
+    let status = CapabilityStatus.notConfigured
+
+    func decision(for _: DataCategory) -> ConsentDecision {
+        .notRecorded
+    }
+
+    func record(decision _: ConsentDecision, for _: DataCategory, purposeId _: String) -> Result<Void, CapabilityError> {
+        .failure(.notConfigured)
+    }
+}
+
+struct UnavailableConsentStore: ConsentStore {
+    let status = CapabilityStatus.unavailable
+
+    func decision(for _: DataCategory) -> ConsentDecision {
+        .notRecorded
+    }
+
+    func record(decision _: ConsentDecision, for _: DataCategory, purposeId _: String) -> Result<Void, CapabilityError> {
+        .failure(.unavailable)
+    }
+}
+
+/// Test/scaffolding store: category + decision only, no disk, no sensitive payloads.
+/// Not wired by CompositionRoot.
+final class InMemoryConsentStore: ConsentStore {
+    let status = CapabilityStatus.ready
+    private var decisions: [DataCategory: ConsentDecision] = [:]
+
+    func decision(for category: DataCategory) -> ConsentDecision {
+        decisions[category] ?? .notRecorded
+    }
+
+    func record(decision: ConsentDecision, for category: DataCategory, purposeId: String) -> Result<Void, CapabilityError> {
+        guard decision != .notRecorded else {
+            decisions.removeValue(forKey: category)
+            return .success(())
+        }
+        guard PurposeRegistry.definition(id: purposeId)?.category == category else {
+            return .failure(.unavailable)
+        }
+        decisions[category] = decision
+        return .success(())
+    }
+}
+
+struct NotConfiguredCrashReporter: CrashReporter {
+    let status = CapabilityStatus.notConfigured
+
+    func captureNonPII(event _: String) -> Result<Void, CapabilityError> {
+        .failure(.notConfigured)
+    }
+}
+
+struct UnavailableCrashReporter: CrashReporter {
+    let status = CapabilityStatus.unavailable
+
+    func captureNonPII(event _: String) -> Result<Void, CapabilityError> {
+        .failure(.unavailable)
+    }
+}
+
+struct NotConfiguredTelemetryPolicy: TelemetryPolicy {
+    let status = CapabilityStatus.notConfigured
+
+    func isAllowed(_: DataCategory) -> Bool {
+        false
+    }
+}
+
+struct UnavailableTelemetryPolicy: TelemetryPolicy {
+    let status = CapabilityStatus.unavailable
+
+    func isAllowed(_: DataCategory) -> Bool {
+        false
+    }
+}
+
+struct NotConfiguredFileValidation: FileValidation {
+    let status = CapabilityStatus.notConfigured
+
+    func validate(descriptor _: ClinicalFileDescriptor) -> Result<Void, CapabilityError> {
+        .failure(.notConfigured)
+    }
+}
+
+struct UnavailableFileValidation: FileValidation {
+    let status = CapabilityStatus.unavailable
+
+    func validate(descriptor _: ClinicalFileDescriptor) -> Result<Void, CapabilityError> {
+        .failure(.unavailable)
+    }
+}
+
+struct NotConfiguredQuarantineStore: QuarantineStore {
+    let status = CapabilityStatus.notConfigured
+
+    func storedDocumentIds() -> Result<[String], CapabilityError> {
+        .failure(.notConfigured)
+    }
+
+    func quarantine(descriptor _: ClinicalFileDescriptor) -> Result<Void, CapabilityError> {
+        .failure(.notConfigured)
+    }
+
+    func discard(documentId _: String) -> Result<Void, CapabilityError> {
+        .failure(.notConfigured)
+    }
+}
+
+struct UnavailableQuarantineStore: QuarantineStore {
+    let status = CapabilityStatus.unavailable
+
+    func storedDocumentIds() -> Result<[String], CapabilityError> {
+        .failure(.unavailable)
+    }
+
+    func quarantine(descriptor _: ClinicalFileDescriptor) -> Result<Void, CapabilityError> {
+        .failure(.unavailable)
+    }
+
+    func discard(documentId _: String) -> Result<Void, CapabilityError> {
+        .failure(.unavailable)
+    }
+}
+
+struct NotConfiguredReportUploadClient: ReportUploadClient {
+    let status = CapabilityStatus.notConfigured
+
+    func upload(documentId _: String) -> Result<Void, CapabilityError> {
+        .failure(.notConfigured)
+    }
+}
+
+struct UnavailableReportUploadClient: ReportUploadClient {
+    let status = CapabilityStatus.unavailable
+
+    func upload(documentId _: String) -> Result<Void, CapabilityError> {
+        .failure(.unavailable)
+    }
+}
+
+struct NotConfiguredClinicalDocumentPipeline: ClinicalDocumentPipeline {
+    let status = CapabilityStatus.notConfigured
+    let lastFailure: CapabilityError? = .notConfigured
+    let activeStage: ClinicalPipelineStage? = nil
+
+    func requestDocumentSelection() -> Result<Void, CapabilityError> {
+        .failure(.notConfigured)
+    }
+
+    func startReview(documentId _: String) -> Result<Void, CapabilityError> {
+        .failure(.notConfigured)
+    }
+
+    func delete(documentId _: String) -> Result<Void, CapabilityError> {
+        .failure(.notConfigured)
+    }
+}
+
+struct UnavailableClinicalDocumentPipeline: ClinicalDocumentPipeline {
+    let status = CapabilityStatus.unavailable
+    let lastFailure: CapabilityError? = .unavailable
+    let activeStage: ClinicalPipelineStage? = nil
+
+    func requestDocumentSelection() -> Result<Void, CapabilityError> {
+        .failure(.unavailable)
+    }
+
+    func startReview(documentId _: String) -> Result<Void, CapabilityError> {
+        .failure(.unavailable)
+    }
+
+    func delete(documentId _: String) -> Result<Void, CapabilityError> {
+        .failure(.unavailable)
     }
 }

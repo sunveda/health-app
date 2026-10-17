@@ -4,6 +4,9 @@
 
 This document turns the initial product specification into a staged architecture for a mobile client serving iOS and Android. It separates the device experience from the cloud trust boundary so that native permissions, identity verification, health-data ingestion, AI processing, and tax workflows can be reviewed independently.
 
+**One-screen tech map:** [STACK.md](STACK.md). **Specification index (docs-first):** [SPEC.md](SPEC.md).
+**Web client (planned, 2026-10-17):** the owner added a web app to scope alongside iOS and Android. It is not in the repo yet; design lives in [architecture/system-architecture.md](architecture/system-architecture.md), [adr/0008](adr/0008-web-client-stack.md), [adr/0009](adr/0009-web-session-and-token-handling.md). Detailed diagrams, data model, API contracts and threat model are in `docs/architecture/` and `docs/security/`.
+
 ## System boundaries
 
 | Boundary | Initial responsibility | Data sensitivity |
@@ -18,40 +21,40 @@ This document turns the initial product specification into a staged architecture
 
 ## Mobile application structure
 
-The clients are native apps in a single monorepo: SwiftUI on iOS and Kotlin/Jetpack Compose on Android. There is no Expo or Expo Router app. Shared product contracts live in `packages/contracts`. `packages/domain` and `packages/api` are reserved (README-only) until calculation engines and transport clients are designed.
+The clients are native apps in a single monorepo: SwiftUI on iOS and Kotlin/Jetpack Compose on Android. There is no Expo or Expo Router app. Shared product contracts live in `packages/contracts`. `packages/domain` holds synthetic medical-expense eligibility fixtures and a platform-neutral placeholder engine (not tax-law guidance; native apps do not import it at runtime). `packages/api` remains reserved (README-only) until transport clients are designed.
 
 ```text
 apps/ios/
   HealthApp/
     App/                # SwiftUI entry; constructs the composition root once
-    Core/               # Platform protocols, NotConfigured/Unavailable stubs, composition root
+    Core/               # Platform protocols, NotConfigured/Unavailable stubs, composition root, privacy, wellness, and clinical helpers
     Features/           # Tab shells (home, health, expenses, settings)
   HealthAppTests/       # Unit tests of mapping helpers and adapter stubs
 apps/android/
   app/src/main/java/com/sunveda/healthapp/
     MainActivity.kt     # Compose entry; constructs the composition root once
     core/               # UI theme only
-    platform/           # Platform interfaces, NotConfigured/Unavailable stubs, composition root
+    platform/           # Platform interfaces, NotConfigured/Unavailable stubs, composition root, privacy, wellness, and clinical helpers
     features/           # Tab shells (home, health, expenses, settings)
   app/src/test/         # JVM unit tests of mapping helpers and adapter stubs
 packages/contracts/     # Live JSON Schemas shared by both clients
-packages/domain/        # Reserved — no calculation engines yet
+packages/domain/        # Synthetic expense-eligibility fixtures + pure tests
 packages/api/           # Reserved — no networking clients yet
 ```
 
 A platform adapter must expose capability availability, permission state, read scope, and failure state. Screens and feature modules must never import or call HealthKit, Health Connect, NFC, biometrics, or secure-storage APIs directly. Capability access is only through Core/platform adapters constructed by a single composition root. This keeps platform-specific behavior testable and prevents accidental permission escalation.
 
-Today those adapters are NotConfigured (and Unavailable) stubs: they return explicit unavailable states and do not request permissions or touch device kits. Real HealthKit, Health Connect, Keychain, Keystore, LocalAuthentication, BiometricPrompt, and CoreNFC implementations may be added later only inside the Core/platform adapter paths, and only the composition root may construct them.
+Today those adapters are NotConfigured (and Unavailable) stubs: they return explicit unavailable states and do not request permissions or touch device kits. Stage 1.5 adds the same pattern for `ConsentStore`, `CrashReporter`, and `TelemetryPolicy` (no persistence of sensitive consent payloads, no crash SDK, no telemetry send). Wellness deepens `HealthDataSource` (availability, permission state, read scope, failure) and adds `WellnessSyncClient` behind a disabled feature flag — still NotConfigured, still no HealthKit or Health Connect calls. Clinical adds `ClinicalDocumentPipeline`, `ReportUploadClient`, `FileValidation`, and `QuarantineStore` — still NotConfigured, still no document picker, network upload, or file pipeline. Real HealthKit, Health Connect, Keychain, Keystore, LocalAuthentication, BiometricPrompt, CoreNFC, document-picker, and upload implementations may be added later only inside the Core/platform adapter paths, and only the composition root may construct them. CI greps for concrete `NotConfigured*` / `Unavailable*` / `InMemory*` constructors outside `CompositionRoot` and unit tests.
 
 ## Signing & release placeholders
 
 Both clients use the placeholder bundle / application ID `com.sunveda.healthapp`. Production signing certificates, provisioning profiles, upload keystores, and API credentials are not stored in this repository. Native CI builds iOS with `CODE_SIGNING_ALLOWED=NO`.
 
-Apple Developer Program membership, App Store Connect / TestFlight, Google Play Console ownership, Play App Signing, and a Play internal testing track are required before the Clinical stage. Account ownership and team emails are TBD with the product owner and are not recorded here.
+Apple Developer Program membership, App Store Connect / TestFlight, Google Play Console ownership, Play App Signing, and a Play internal testing track are required before the Clinical stage. Account ownership and team emails are TBD with the product owner and are not recorded here. The operational checklist is [`release-checklist.md`](release-checklist.md).
 
 ## Backend target
 
-The supplied specification proposes Cloud Run for containerized services, Firestore for user health metadata and longitudinal profiles, Vertex AI for AI-assisted processing, Cloud KMS with CMEK for key management, and VPC Service Controls plus Cloud Armor for perimeter and ingress protection. These are target decisions, not yet deployed infrastructure. The backend should be split into independently authorized services for identity, health data, clinical documents, expenses, AI jobs, and exports.
+**Updated 2026-10-17:** the original specification proposed Cloud Run, Firestore, Vertex AI, Cloud KMS/CMEK, VPC Service Controls and Cloud Armor. The owner has since chosen Vercel (Next.js BFF/API) with Vercel-managed Postgres (Neon), and deferred AI to post-MVP; see [ADR-0011](adr/0011-hosting-vercel-neon.md), [ADR-0012](adr/0012-ai-deferred.md) and [hosting-and-compliance](architecture/hosting-and-compliance.md). These are target decisions, not yet deployed infrastructure. The backend should be split into independently authorized services for identity, health data, clinical documents, expenses, AI jobs, and exports.
 
 Sensitive values should be partitioned by purpose. The pairwise subject identifier is the application-facing identity key. Direct identifiers and the individual number should be isolated from general health records, encrypted with managed keys, and accessed only by narrowly authorized services. The mobile app should receive the minimum data required for each screen and should not persist the individual number unless a reviewed product requirement makes this unavoidable.
 
@@ -70,9 +73,16 @@ Data acquisition, normalization, storage, AI processing, export, and deletion mu
 | Stage | Deliverable | Exit criteria |
 |---|---|---|
 | Foundation | Monorepo, typed contracts, navigation shell, security policy | CI passes; no secrets committed |
+| Security/privacy baseline | Data classification, device-boundary note, PII-safe logging, consent/purpose scaffolding, crash-reporting decision | Data-classification and device-boundary note published; PII-safe logging policy; consent/purpose scaffolding interfaces present; crash-reporting decision recorded |
 | Identity | OIDC/PKCE handoff and local biometric unlock | Threat model and provider integration review complete |
-| Wellness | HealthKit and Health Connect read adapters | Permission minimization and platform tests pass |
-| Clinical | Secure report upload and review flow | File validation, redaction, and deletion tested |
+| Wellness | Minimized HealthKit / Health Connect read adapters behind CompositionRoot and a feature flag | Smallest necessary read scopes with purpose-tied permission UX; adapters constructed only by CompositionRoot; feature flag off until kit wiring is reviewed; platform tests cover not-configured, unavailable, denied, and ready paths |
+| Clinical | Secure report upload and review surface behind CompositionRoot | Secure upload, file validation, quarantine, user review, and deletion tested; adapters constructed only by CompositionRoot; no invented upload URLs or scanner vendors |
 | Expenses | Expense import, calculation, and export preview | Calculation fixtures and user confirmation flow pass |
 | AI insights | Grounded summaries and trend views | Safety review, provenance display, and fallback states pass |
 | Production hardening | Cloud controls, monitoring, incident response | Independent security and privacy review complete |
+
+Classification, device-boundary principles, logging redaction, consent scaffolding, and the crash-reporting decision are in [`privacy-baseline.md`](privacy-baseline.md). That stage does not add backend URLs or unblock Identity.
+
+Wellness intended read scopes, deferred kit wiring, and the feature-flag approach are in [`wellness-baseline.md`](wellness-baseline.md). Current clients ship NotConfigured wellness stubs only; that does not complete Wellness, Identity, or Clinical.
+
+Clinical intended pipeline stages (selection, validation, quarantine, upload, review, deletion) and the NotConfigured upload/review posture are in [`clinical-baseline.md`](clinical-baseline.md). Current clients ship NotConfigured clinical stubs only; that does not complete Clinical, Identity, or Wellness.

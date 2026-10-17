@@ -15,7 +15,7 @@ The application handles identity, health, and financial information. The default
 | Uploads | Enforce MIME/type limits, size limits, malware scanning, quarantine, encryption, and explicit retention |
 | AI | Ground output in user-approved records, show provenance and timestamps, avoid diagnosis claims, and provide safe fallback states |
 | Exports | Require an explicit review and confirmation step before generating or sharing expense or health exports |
-| Infrastructure | Use separate projects and service accounts, least privilege, CMEK where required, perimeter controls, monitoring, and tested incident response |
+| Infrastructure | Use separate projects and service accounts, least privilege, application-level encryption of sensitive fields (provider-managed keys only on Vercel/Neon; see hosting-and-compliance), perimeter controls and rate limits, monitoring, and tested incident response |
 
 ## My Number handling
 
@@ -30,6 +30,14 @@ Before production integration, review at minimum: authorization-code interceptio
 ## Compliance posture
 
 The product team must document the lawful basis and purpose for each data category, user notices and consent language, retention periods, deletion/export procedures, processor and subprocessor responsibilities, access review, incident notification, and the exact requirements of applicable Japanese privacy and My Number regulations. Cloud certifications and security controls support a compliance program but do not replace product-specific legal review.
+
+## Stage 1.5 baseline
+
+Classification, on-device vs later-sync principles, logging redaction, the crash-reporting **not configured** decision, and consent/purpose scaffolding are in [`privacy-baseline.md`](privacy-baseline.md). Lawful basis and user-facing legal copy remain TODO for product/legal. TestFlight / Play internal-track prerequisites (no in-repo certs; signing ownership TBD) are in [`release-checklist.md`](release-checklist.md).
+
+Wellness device-health adapters remain **NotConfigured**: no HealthKit or Health Connect permission requests or reads. Intended later scopes and the feature-flag approach are in [`wellness-baseline.md`](wellness-baseline.md). That note does not complete the Wellness delivery stage.
+
+Clinical upload/review adapters remain **NotConfigured**: no document picker, network upload, quarantine store, or scanner vendor. Intended later pipeline stages are in [`clinical-baseline.md`](clinical-baseline.md). That note does not complete the Clinical delivery stage.
 
 ## Development safeguards
 

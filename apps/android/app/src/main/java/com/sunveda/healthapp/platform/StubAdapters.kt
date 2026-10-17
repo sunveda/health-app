@@ -62,10 +62,38 @@ class UnavailableBiometricUnlock : BiometricUnlock {
 
 class NotConfiguredHealthDataSource : HealthDataSource {
     override val status = CapabilityStatus.NOT_CONFIGURED
+    override val permissionState = HealthPermissionState.NOT_CONFIGURED
+    override val grantedReadScopes: Set<WellnessReadScope> = emptySet()
+    override val lastFailure: CapabilityStatus? = CapabilityStatus.NOT_CONFIGURED
+
+    override fun requestReadAccess(scopes: Set<WellnessReadScope>) =
+        CapabilityOutcome.Unavailable(CapabilityStatus.NOT_CONFIGURED)
 }
 
 class UnavailableHealthDataSource : HealthDataSource {
     override val status = CapabilityStatus.UNAVAILABLE
+    override val permissionState = HealthPermissionState.UNAVAILABLE
+    override val grantedReadScopes: Set<WellnessReadScope> = emptySet()
+    override val lastFailure: CapabilityStatus? = CapabilityStatus.UNAVAILABLE
+
+    override fun requestReadAccess(scopes: Set<WellnessReadScope>) =
+        CapabilityOutcome.Unavailable(CapabilityStatus.UNAVAILABLE)
+}
+
+class NotConfiguredWellnessSyncClient : WellnessSyncClient {
+    override val featureFlag = WellnessFeatureFlag.DISABLED
+    override val status = CapabilityStatus.NOT_CONFIGURED
+    override val lastSyncedAt: java.time.Instant? = null
+
+    override fun sync() = CapabilityOutcome.Unavailable(CapabilityStatus.NOT_CONFIGURED)
+}
+
+class UnavailableWellnessSyncClient : WellnessSyncClient {
+    override val featureFlag = WellnessFeatureFlag.DISABLED
+    override val status = CapabilityStatus.UNAVAILABLE
+    override val lastSyncedAt: java.time.Instant? = null
+
+    override fun sync() = CapabilityOutcome.Unavailable(CapabilityStatus.UNAVAILABLE)
 }
 
 class NotConfiguredNfcCapability : NfcCapability {
@@ -86,4 +114,154 @@ class UnavailableIdentitySession : IdentitySession {
     override val status = CapabilityStatus.UNAVAILABLE
 
     override fun pairwiseSubject(): String? = null
+}
+
+class NotConfiguredConsentStore : ConsentStore {
+    override val status = CapabilityStatus.NOT_CONFIGURED
+
+    override fun decision(category: DataCategory) = ConsentDecision.NOT_RECORDED
+
+    override fun record(decision: ConsentDecision, category: DataCategory, purposeId: String) =
+        CapabilityOutcome.Unavailable(CapabilityStatus.NOT_CONFIGURED)
+}
+
+class UnavailableConsentStore : ConsentStore {
+    override val status = CapabilityStatus.UNAVAILABLE
+
+    override fun decision(category: DataCategory) = ConsentDecision.NOT_RECORDED
+
+    override fun record(decision: ConsentDecision, category: DataCategory, purposeId: String) =
+        CapabilityOutcome.Unavailable(CapabilityStatus.UNAVAILABLE)
+}
+
+/** Test/scaffolding store: category + decision only, no disk, no sensitive payloads. Not wired by CompositionRoot. */
+class InMemoryConsentStore : ConsentStore {
+    override val status = CapabilityStatus.READY
+    private val decisions = mutableMapOf<DataCategory, ConsentDecision>()
+
+    override fun decision(category: DataCategory) =
+        decisions[category] ?: ConsentDecision.NOT_RECORDED
+
+    override fun record(decision: ConsentDecision, category: DataCategory, purposeId: String): CapabilityOutcome<Unit> {
+        if (decision == ConsentDecision.NOT_RECORDED) {
+            decisions.remove(category)
+            return CapabilityOutcome.Success(Unit)
+        }
+        val purpose = PurposeRegistry.definition(purposeId)
+        if (purpose == null || purpose.category != category) {
+            return CapabilityOutcome.Unavailable(CapabilityStatus.UNAVAILABLE)
+        }
+        decisions[category] = decision
+        return CapabilityOutcome.Success(Unit)
+    }
+}
+
+class NotConfiguredCrashReporter : CrashReporter {
+    override val status = CapabilityStatus.NOT_CONFIGURED
+
+    override fun captureNonPII(event: String) =
+        CapabilityOutcome.Unavailable(CapabilityStatus.NOT_CONFIGURED)
+}
+
+class UnavailableCrashReporter : CrashReporter {
+    override val status = CapabilityStatus.UNAVAILABLE
+
+    override fun captureNonPII(event: String) =
+        CapabilityOutcome.Unavailable(CapabilityStatus.UNAVAILABLE)
+}
+
+class NotConfiguredTelemetryPolicy : TelemetryPolicy {
+    override val status = CapabilityStatus.NOT_CONFIGURED
+
+    override fun isAllowed(category: DataCategory) = false
+}
+
+class UnavailableTelemetryPolicy : TelemetryPolicy {
+    override val status = CapabilityStatus.UNAVAILABLE
+
+    override fun isAllowed(category: DataCategory) = false
+}
+
+class NotConfiguredFileValidation : FileValidation {
+    override val status = CapabilityStatus.NOT_CONFIGURED
+
+    override fun validate(descriptor: ClinicalFileDescriptor) =
+        CapabilityOutcome.Unavailable(CapabilityStatus.NOT_CONFIGURED)
+}
+
+class UnavailableFileValidation : FileValidation {
+    override val status = CapabilityStatus.UNAVAILABLE
+
+    override fun validate(descriptor: ClinicalFileDescriptor) =
+        CapabilityOutcome.Unavailable(CapabilityStatus.UNAVAILABLE)
+}
+
+class NotConfiguredQuarantineStore : QuarantineStore {
+    override val status = CapabilityStatus.NOT_CONFIGURED
+
+    override fun storedDocumentIds() =
+        CapabilityOutcome.Unavailable(CapabilityStatus.NOT_CONFIGURED)
+
+    override fun quarantine(descriptor: ClinicalFileDescriptor) =
+        CapabilityOutcome.Unavailable(CapabilityStatus.NOT_CONFIGURED)
+
+    override fun discard(documentId: String) =
+        CapabilityOutcome.Unavailable(CapabilityStatus.NOT_CONFIGURED)
+}
+
+class UnavailableQuarantineStore : QuarantineStore {
+    override val status = CapabilityStatus.UNAVAILABLE
+
+    override fun storedDocumentIds() =
+        CapabilityOutcome.Unavailable(CapabilityStatus.UNAVAILABLE)
+
+    override fun quarantine(descriptor: ClinicalFileDescriptor) =
+        CapabilityOutcome.Unavailable(CapabilityStatus.UNAVAILABLE)
+
+    override fun discard(documentId: String) =
+        CapabilityOutcome.Unavailable(CapabilityStatus.UNAVAILABLE)
+}
+
+class NotConfiguredReportUploadClient : ReportUploadClient {
+    override val status = CapabilityStatus.NOT_CONFIGURED
+
+    override fun upload(documentId: String) =
+        CapabilityOutcome.Unavailable(CapabilityStatus.NOT_CONFIGURED)
+}
+
+class UnavailableReportUploadClient : ReportUploadClient {
+    override val status = CapabilityStatus.UNAVAILABLE
+
+    override fun upload(documentId: String) =
+        CapabilityOutcome.Unavailable(CapabilityStatus.UNAVAILABLE)
+}
+
+class NotConfiguredClinicalDocumentPipeline : ClinicalDocumentPipeline {
+    override val status = CapabilityStatus.NOT_CONFIGURED
+    override val lastFailure: CapabilityStatus? = CapabilityStatus.NOT_CONFIGURED
+    override val activeStage: ClinicalPipelineStage? = null
+
+    override fun requestDocumentSelection() =
+        CapabilityOutcome.Unavailable(CapabilityStatus.NOT_CONFIGURED)
+
+    override fun startReview(documentId: String) =
+        CapabilityOutcome.Unavailable(CapabilityStatus.NOT_CONFIGURED)
+
+    override fun delete(documentId: String) =
+        CapabilityOutcome.Unavailable(CapabilityStatus.NOT_CONFIGURED)
+}
+
+class UnavailableClinicalDocumentPipeline : ClinicalDocumentPipeline {
+    override val status = CapabilityStatus.UNAVAILABLE
+    override val lastFailure: CapabilityStatus? = CapabilityStatus.UNAVAILABLE
+    override val activeStage: ClinicalPipelineStage? = null
+
+    override fun requestDocumentSelection() =
+        CapabilityOutcome.Unavailable(CapabilityStatus.UNAVAILABLE)
+
+    override fun startReview(documentId: String) =
+        CapabilityOutcome.Unavailable(CapabilityStatus.UNAVAILABLE)
+
+    override fun delete(documentId: String) =
+        CapabilityOutcome.Unavailable(CapabilityStatus.UNAVAILABLE)
 }

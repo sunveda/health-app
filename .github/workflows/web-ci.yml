@@ -1,0 +1,70 @@
+name: Web CI
+
+# Gates for the planned web client (apps/web; ADR-0008..0011).
+# apps/web does not exist yet: every web-specific step is conditional and the
+# workflow passes. The pattern-checker tests always run.
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+concurrency:
+  group: web-ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  web-gates:
+    name: Web gates (patterns, lockfile, audit, build)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+
+      - name: Test the web pattern checker
+        shell: bash
+        run: python3 -m unittest discover -s scripts -t scripts -p 'test_check_web_patterns.py'
+
+      - name: Web forbidden-pattern gate (skips when apps/web is absent)
+        shell: bash
+        run: python3 scripts/check-web-patterns.py
+
+      - name: Detect web app
+        id: detect
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [ -f apps/web/package.json ]; then
+            echo "present=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "present=false" >> "$GITHUB_OUTPUT"
+            echo "apps/web/package.json not found; skipping install, audit and build."
+          fi
+
+      - name: Enable pnpm via corepack (version from packageManager)
+        if: steps.detect.outputs.present == 'true'
+        shell: bash
+        run: corepack enable
+
+      - name: Install with frozen lockfile and no lifecycle scripts
+        if: steps.detect.outputs.present == 'true'
+        shell: bash
+        run: pnpm install --frozen-lockfile --ignore-scripts
+
+      - name: Dependency audit (production, high and above)
+        if: steps.detect.outputs.present == 'true'
+        shell: bash
+        run: pnpm audit --prod --audit-level=high
+
+      - name: Typecheck, lint, test, build
+        if: steps.detect.outputs.present == 'true'
+        shell: bash
+        run: |
+          set -euo pipefail
+          for script in typecheck lint test build; do
+            pnpm --filter ./apps/web run --if-present "$script"
+          done
