@@ -32,7 +32,7 @@ The product is a **portal**, not a clinical device or a tax-advice engine: it or
 |---|---|---|
 | iOS | SwiftUI (`apps/ios`) | HealthKit, Keychain, LocalAuthentication, CoreNFC — **only** via Core adapters from CompositionRoot |
 | Android | Kotlin + Jetpack Compose (`apps/android`) | Health Connect, Keystore, BiometricPrompt, NFC — **only** via platform adapters from CompositionRoot |
-| Web (**PLANNED**, owner scope 2026-10-17) | TypeScript + React (`apps/web`, not yet created; [ADR-0008](adr/0008-web-client-stack.md)) | No HealthKit/Health Connect/NFC equivalent: wellness is manual entry or file import only; tokens server-side via BFF; WebAuthn for local re-entry. See [platform limits](architecture/system-architecture.md#8-platform-limits-matrix) |
+| Web (**PLANNED**, owner scope 2026-10-17; stack **approved**) | Next.js + React + TypeScript with BFF (`apps/web`, not yet created; [ADR-0008](adr/0008-web-client-stack.md), [ADR-0009](adr/0009-web-session-and-token-handling.md)); hosted on Vercel ([ADR-0011](adr/0011-hosting-vercel-neon.md)); sign-in per [ADR-0010](adr/0010-web-auth-strategy.md); **clinical upload in MVP scope, fail closed until security review** | No HealthKit/Health Connect/NFC equivalent: wellness is manual entry or file import only; tokens server-side via BFF; WebAuthn for local re-entry. See [platform limits](architecture/system-architecture.md#8-platform-limits-matrix) |
 
 Shared: `packages/contracts` (JSON Schemas), `packages/domain` (synthetic medical-expense eligibility fixtures). **No shared UI.** Bundle / application ID: `com.sunveda.healthapp` (see release checklist).
 
@@ -52,13 +52,13 @@ MVP is a **shippable shell with honest stubs**, not a production My Number integ
 
 - Wired My Number / Digital Authentication App OIDC (issuer, client ID, scopes, redirect URIs) — **blocked / TBD**
 - Real HealthKit or Health Connect permission prompts or sample reads
-- Real clinical document picker, network upload, quarantine persistence, or malware-scanner vendor
-- Production backend (Cloud Run, Firestore, Vertex AI, KMS, etc.) — target architecture only
+- Real clinical document picker, network upload (native **and web**: in MVP scope but implemented only after security review), quarantine persistence, or malware-scanner vendor
+- Production backend (Vercel Functions, Neon Postgres, private storage) — target architecture only; AI (any provider) deferred to post-MVP ([ADR-0012](adr/0012-ai-deferred.md))
 - Crash / analytics SDKs with real DSNs
 - Tax filing submission or official e-Tax integration
 - Diagnosis, treatment recommendations, or claims of medical device status
 - Household / multi-profile delegation
-- Web or Expo clients
+- Expo / React Native clients (web is in scope; see ADR-0008)
 - Invented permission strings, upload URLs, or NFC reader commands
 
 ## 6. Authentication (high level)
@@ -120,7 +120,9 @@ Every acquisition path needs purpose id + consent decision before real kit or ne
 | Q5 | Crash / telemetry vendor after PII review | Engineering + privacy | Not configured |
 | Q6 | Apple / Play account ownership and signing custody | Owner | TBD (not in repo) |
 | Q7 | Expense export destination (local file vs future tax service) | Product | TBD |
-| Q8 | AI model / Vertex grounding and safety review bar | Product + CoE | Post-Expenses stage |
+| Q8 | AI provider and safety review bar | Product + CoE | **Deferred post-MVP** ([ADR-0012](adr/0012-ai-deferred.md)) |
+| Q10 | Web sign-in: official IdP web flow (free, supported?) vs passkeys vs email OTP | Owner + legal | Decision tree accepted ([ADR-0010](adr/0010-web-auth-strategy.md)); IdP web support UNCONFIRMED |
+| Q11 | Legal review of Vercel/Neon hosting (APPI, cross-border, sub-processors, My Number Act) | Legal | Open; list in [hosting-and-compliance §4](architecture/hosting-and-compliance.md) |
 | Q9 | When CoS fully resumes feature eng vs docs-only | CoS | Docs hold lifted 2026-09-29; features still gated on spec review |
 
 ## 11. Staging reminder

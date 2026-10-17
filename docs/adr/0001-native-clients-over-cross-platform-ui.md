@@ -3,7 +3,7 @@
 **Status:** Accepted · **Date:** 2026-10-17 (records existing decision)
 
 ## Context
-The portal needs HealthKit / Health Connect, Keychain / Keystore, biometrics, NFC, and per-platform accessibility. An earlier Expo scaffold was removed; CI still rejects `EXPO_PUBLIC_`.
+The portal needs HealthKit / Health Connect, Keychain / Keystore, biometrics, NFC, and per-platform accessibility. An earlier Expo scaffold was removed; CI still rejects the Expo public-env prefix.
 
 ## Decision
 SwiftUI (iOS 17+, Swift 5.9) and Kotlin + Jetpack Compose (minSdk 26) as separate apps in one monorepo. No React Native, Expo, or Flutter for the mobile clients.

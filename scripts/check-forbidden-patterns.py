@@ -41,6 +41,7 @@ SKIP_PATH_PREFIXES = (
 )
 
 CHECKER_RELATIVE = "scripts/check-forbidden-patterns.py"
+WEB_CHECKER_RELATIVE = "scripts/check-web-patterns.py"  # holds token-prefix regexes by design
 
 EXPO_PUBLIC = re.compile(r"EXPO_PUBLIC_")
 PEM_HEADER = re.compile(r"-----BEGIN (?:[A-Z0-9]+ )?PRIVATE KEY-----")
@@ -217,7 +218,7 @@ def main() -> int:
         if text is None:
             continue
 
-        if path != CHECKER_RELATIVE:
+        if path not in (CHECKER_RELATIVE, WEB_CHECKER_RELATIVE):
             for match in EXPO_PUBLIC.finditer(text):
                 line = text.count("\n", 0, match.start()) + 1
                 violations.append(f"{path}:{line}: forbidden Expo public env prefix EXPO_PUBLIC_")
@@ -226,7 +227,7 @@ def main() -> int:
             line = text.count("\n", 0, match.start()) + 1
             violations.append(f"{path}:{line}: private key PEM header")
 
-        if path != CHECKER_RELATIVE:
+        if path not in (CHECKER_RELATIVE, WEB_CHECKER_RELATIVE):
             for match in TOKEN_ASSIGNMENT.finditer(text):
                 line = text.count("\n", 0, match.start()) + 1
                 violations.append(f"{path}:{line}: obvious secret assignment")
@@ -234,7 +235,7 @@ def main() -> int:
                 line = text.count("\n", 0, match.start()) + 1
                 violations.append(f"{path}:{line}: obvious token material")
 
-        if path.endswith(CODE_SUFFIXES) and path != CHECKER_RELATIVE:
+        if path.endswith(CODE_SUFFIXES) and path not in (CHECKER_RELATIVE, WEB_CHECKER_RELATIVE):
             if not is_adapter_path(path):
                 for label, pattern in KIT_PATTERNS:
                     for match in pattern.finditer(text):

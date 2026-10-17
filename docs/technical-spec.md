@@ -87,7 +87,8 @@ When real kit wiring is approved later, only CompositionRoot may flip feature fl
 | OIDC / My Number IdP client | — | — | **Blocked / not present** |
 | Backend HTTP clients (`packages/api`) | — | — | **Reserved empty** |
 | Domain expense fixtures | — | — | **Built** in `packages/domain` (synthetic) |
-| AI / Vertex clients | — | — | **Not started** |
+| AI clients | — | — | **Deferred post-MVP** (ADR-0012) |
+| Web adapters (`apps/web/src/core`) incl. clinical upload | — | web | **PLANNED**; same NotConfigured default |
 
 ## 4. Auth design (blocked)
 
@@ -160,6 +161,7 @@ Expected gates (keep / harden; do not weaken):
 4. **Secret / prohibited sample scanning** — no tokens, individual numbers, or real clinical content.
 5. **Schema / domain tests** for contracts and synthetic fixtures.
 6. **CODE_SIGNING_ALLOWED=NO** for iOS CI builds.
+7. **Web gates** (`web-ci.yml`): pattern checker tests; `scripts/check-web-patterns.py` (browser storage, XSS sinks, SDKs and adapter constructors confined to `apps/web/src/core/`, secrets, public blob access, unpinned deps, lockfile); once `apps/web` exists, frozen-lockfile install without lifecycle scripts, `pnpm audit --prod --audit-level=high`, typecheck, lint, test, build.
 
 Pull requests should include: data-classification note for new fields; statement if a new native permission is introduced; redaction/auth tests where relevant ([`security.md`](security.md)).
 
@@ -170,18 +172,18 @@ Pull requests should include: data-classification note for new fields; statement
 - Wiring Identity, kits, or upload SDKs “to unblock demos”
 - Persisting individual number without explicit data-flow + legal approval
 - Logging tokens, pairwise subjects, diagnoses, report bytes, or expense narratives
-- Treating Cloud Run / Firestore / Vertex target decisions as deployed infrastructure
+- Treating Vercel / Neon target decisions as deployed infrastructure, or putting real data on Hobby/Free tiers
 - Expanding this repo into other SunVeda products
 
-## 9. Backend target (not deployed)
+## 9. Backend and hosting target (not deployed)
 
-Per architecture: Cloud Run services, Firestore for health metadata, Vertex AI for grounded jobs, Cloud KMS / CMEK, VPC Service Controls + Cloud Armor. Split independently authorized services for identity, health data, clinical documents, expenses, AI jobs, and exports. Mobile receives minimum data per screen.
+Per [ADR-0011](adr/0011-hosting-vercel-neon.md): Next.js BFF/API on Vercel Functions (`hnd1`), Vercel-managed Postgres (Neon), private object storage for clinical files, application-level envelope encryption for sensitive fields; no AI in MVP ([ADR-0012](adr/0012-ai-deferred.md)). The Cloud Run / Firestore / KMS plan ([ADR-0006](adr/0006-backend-target-gcp.md)) is superseded. Logical modules for identity, health data, clinical documents, expenses and exports stay independently authorized. Clients receive minimum data per screen. Residency, cost and legal gates: [hosting-and-compliance](architecture/hosting-and-compliance.md).
 
 These are **targets**, not current implementations. Clients must not hardcode service URLs.
 
 ## 9b. Web client (PLANNED)
 
-Owner scope (2026-10-17): ship as web + iOS + Android. `apps/web` is not in the repo. Proposed design: [ADR-0008](adr/0008-web-client-stack.md), [ADR-0009](adr/0009-web-session-and-token-handling.md), [system-architecture §5.4](architecture/system-architecture.md). Same CompositionRoot + NotConfigured pattern; web CI gates must be added first.
+Owner scope (2026-10-17): ship as web + iOS + Android. `apps/web` is not in the repo. Accepted design (stack approved 2026-10-17; web clinical upload in MVP, fail closed until review; auth per [ADR-0010](adr/0010-web-auth-strategy.md)): [ADR-0008](adr/0008-web-client-stack.md), [ADR-0009](adr/0009-web-session-and-token-handling.md), [system-architecture §5.4](architecture/system-architecture.md). Same CompositionRoot + NotConfigured pattern. Web CI gates exist (`.github/workflows/web-ci.yml`, `scripts/check-web-patterns.py`) and pass while `apps/web` is absent; they apply as soon as it is created.
 
 ## 10. Related links
 

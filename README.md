@@ -35,7 +35,7 @@ The applications share **contracts**, not UI code. This avoids a lowest-common-d
 
 See [docs/CONTEXT.md](docs/CONTEXT.md) for living handoff detail (blockers, owners).
 
-The repository contains native application shells, a Core/platform composition root with NotConfigured adapters (including consent, crash reporting, telemetry policy, wellness sync, and clinical upload/review stubs), shared contract schemas, synthetic domain eligibility fixtures, and security/privacy baseline documentation. The My Number identity-provider integration, HealthKit and Health Connect permissions, NFC reader support, secure upload pipeline, backend services, and Vertex AI workflows are deliberately not wired to guessed endpoints or credentials. Those integrations require official provider documentation, app registration, compliance approval, and threat-model review.
+The repository contains native application shells, a Core/platform composition root with NotConfigured adapters (including consent, crash reporting, telemetry policy, wellness sync, and clinical upload/review stubs), shared contract schemas, synthetic domain eligibility fixtures, and security/privacy baseline documentation. The My Number identity-provider integration, HealthKit and Health Connect permissions, NFC reader support, secure upload pipeline, backend services, and AI workflows (deferred to post-MVP) are deliberately not wired to guessed endpoints or credentials. Those integrations require official provider documentation, app registration, compliance approval, and threat-model review.
 
 As of **2026-09-29**, the active track is **docs & specification** ([STACK.md](docs/STACK.md), [SPEC.md](docs/SPEC.md)) — not feature implementation. Specialist bot: **Health App**. Coordinate via Chief of Staff / Chief of Engineering.
 
@@ -47,6 +47,7 @@ As of **2026-09-29**, the active track is **docs & specification** ([STACK.md](d
 - [`docs/product-spec.md`](docs/product-spec.md), [`docs/technical-spec.md`](docs/technical-spec.md), [`docs/mvp-screens.md`](docs/mvp-screens.md) (draft)
 - [`docs/architecture.md`](docs/architecture.md)
 - [`docs/architecture/system-architecture.md`](docs/architecture/system-architecture.md) (diagrams, module design), [`data-model.md`](docs/architecture/data-model.md), [`api-contracts.md`](docs/architecture/api-contracts.md)
+- [`docs/architecture/hosting-and-compliance.md`](docs/architecture/hosting-and-compliance.md) (Vercel + Neon facts, residency, legal review items)
 - [`docs/security/threat-model.md`](docs/security/threat-model.md)
 - [`docs/adr/`](docs/adr/README.md) (architecture decision records)
 - [`docs/development.md`](docs/development.md) (dev & test guide)

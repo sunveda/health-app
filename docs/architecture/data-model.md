@@ -110,12 +110,12 @@ Enumerations (CODE): `ReviewReason` = `undocumented`, `unknown_category`, `negat
 | Data | Device (native) | Browser (web) | Backend (PLANNED) |
 |---|---|---|---|
 | Tokens / session | Keychain / Keystore | **Not in browser JS**; httpOnly cookie only | BFF holds tokens; API validates |
-| pairwiseSub | Platform-protected storage | Server session; shown only as needed | Firestore, keyed account id |
-| Individual number | Not persisted | Not persisted | Isolated, KMS/CMEK, narrowly authorized, only if reviewed |
-| Health measurements | Local cache scoped to purpose (after Wellness) | In-memory / not persisted client-side | Firestore metadata after consent |
-| Clinical documents | Local quarantine until upload | Transient in memory during upload; no persistent store | Encrypted object storage (service TBD), quarantine then review |
-| Expense drafts | Local drafts | Server-held drafts; no localStorage | Firestore |
-| Consent | Local record + server ledger | Server-side ledger | Firestore, append-only audit |
+| pairwiseSub | Platform-protected storage | Server session; shown only as needed | Postgres (Neon), keyed account id; app-level encrypted if sensitive |
+| Individual number | Not persisted | Not persisted | **Not stored by default** (My Number Act review; ADR-0011). Any exception: isolated, envelope-encrypted, narrowly authorized, only if legally approved |
+| Health measurements | Local cache scoped to purpose (after Wellness) | In-memory / not persisted client-side | Postgres metadata after consent; sensitive fields envelope-encrypted |
+| Clinical documents | Local quarantine until upload | Transient in memory during upload; no persistent store | Private object storage (provisional Vercel Blob private, [ADR-0011](../adr/0011-hosting-vercel-neon.md)); quarantine prefix, then review; signed short-lived access only; web uploads included in MVP |
+| Expense drafts | Local drafts | Server-held drafts; no localStorage | Postgres |
+| Consent | Local record + server ledger | Server-side ledger | Postgres, append-only audit table |
 | Telemetry | Not configured | Not configured | Non-PII only, after vendor review |
 
 ## 6. Retention and deletion (policy TODO)
@@ -134,3 +134,17 @@ Retention periods are **TODO for product/legal** — none are decided and none a
 3. `additionalProperties: false` stays; add fields explicitly and version the schema `$id` path when breaking (see [api-contracts.md](api-contracts.md)).
 4. Planned contract expansion order follows delivery stages: expenses detail → wellness measurements → clinical document status → AI insight. Identity expansion is blocked.
 5. TypeScript types for web, and Swift/Kotlin models, are generated or validated against the schema (tooling PLANNED).
+
+## 8. Postgres model, encryption and keys (PLANNED; ADR-0011)
+
+Backend store is Vercel-managed Postgres (Neon). Logical tables (names illustrative, **no schema is implemented**): `accounts` (pairwise sub or fallback-auth account id), `webauthn_credentials` (public key, counter, no secrets), `sessions` (hashed session id, expiry, auth method), `otp_challenges` (hashed code, expiry, attempts; only if ADR-0010 option 3 is enabled), `consents` (append-only), `wellness_measurements`, `clinical_documents` (metadata, stage, storage key, scan result, retention), `expense_drafts`, `audit_events` (metadata only).
+
+Rules:
+
+- **Row-level ownership:** every query is scoped by the authenticated account id; cross-user access is covered by tests (IDOR).
+- **Envelope encryption:** sensitive columns (free-text clinical notes, measurement values, expense narratives, document keys) are encrypted in the application with a per-record data key wrapped by a master key; provider at-rest encryption (AES-256) is a second layer, not the only one. Key rotation and re-wrap procedure TBD.
+- **Master-key custody is an open decision** (external KMS vs platform secret), see [hosting-and-compliance §5](hosting-and-compliance.md). The earlier GCP KMS/CMEK plan is superseded.
+- **Individual number:** never stored or logged.
+- **Clinical files** live in private object storage under a random, non-guessable key stored in `clinical_documents`; the database never stores file bytes. Quarantine and accepted files use separate prefixes; deletion removes object, row and derived data; backups/PITR retain history for the plan window (7-30 days on paid plans, 6 hours on Free).
+- **Migrations:** versioned SQL, reviewed, run from CI with a migration-only credential; production credentials never in Preview scope.
+- **Fixtures:** synthetic only; Preview and local databases never receive production data or branches.

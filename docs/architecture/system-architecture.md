@@ -26,7 +26,7 @@ Related: [STACK.md](../STACK.md) · [SPEC.md](../SPEC.md) · [architecture.md](.
 | `packages/contracts` | **BUILT** (one schema, `portal.json`) |
 | `packages/domain` | **BUILT** (Python synthetic fixtures; apps do not import it) |
 | `packages/api` | README only (**PLANNED**) |
-| Backend (Cloud Run etc.) | **PLANNED**, not deployed, no URLs |
+| Backend (Vercel Functions BFF/API + Neon Postgres + private storage) | **PLANNED**, not deployed, no URLs |
 | Identity (My Number IdP) | **BLOCKED** |
 
 ## 2. System context
@@ -45,7 +45,7 @@ flowchart LR
   end
   idp["Official My Number IdP - BLOCKED, UNCONFIRMED"]
   kits["HealthKit / Health Connect - STUB, native only"]
-  gcp["Vertex AI / KMS / Firestore - PLANNED"]
+  data["Neon Postgres + private object storage - PLANNED (ADR-0011)"]
   user --> ios
   user --> android
   user --> web
@@ -53,7 +53,7 @@ flowchart LR
   android -.->|"not wired"| api
   web -.->|"not wired"| bff
   bff --> api
-  api --> gcp
+  api --> data
   ios -.->|"OIDC + PKCE design only"| idp
   android -.->|"OIDC + PKCE design only"| idp
   bff -.->|"OIDC + PKCE design only"| idp
@@ -146,7 +146,7 @@ flowchart LR
   map --> ws["wellnessSync contract: platform, status, lastSyncedAt"]
   hds --> sync["WellnessSyncClient - flag disabled"]
   sync -.->|"after consent + API design"| api["Health service - PLANNED"]
-  api --> fs[("Firestore - health metadata - PLANNED")]
+  api --> fs[("Postgres (Neon) - health metadata - PLANNED")]
 ```
 
 ### 4.3 Clinical upload
@@ -156,12 +156,15 @@ flowchart LR
   pick["Document selection - behind adapter"] --> val["FileValidation: type and size"]
   val --> q["QuarantineStore - local holding"]
   q --> up["ReportUploadClient - encrypted, resumable"]
-  up -.->|"URL not defined - no hardcoded storage URLs"| svc["Clinical service - PLANNED"]
-  svc --> scan["Server-side validation + malware scan - vendor TBD"]
-  scan --> review["User review before extraction"]
-  review --> ext["Extraction / summarization - PLANNED"]
+  up -.->|"via BFF/API only - no hardcoded storage URLs"| svc["Clinical service - PLANNED"]
+  svc --> priv[("Private object store, quarantine prefix - provisional Vercel Blob private")]
+  priv --> scan["Server-side validation + malware scan - vendor TBD"]
+  scan --> review["User review before acceptance"]
+  review --> ext["Extraction / summarization - DEFERRED (ADR-0012)"]
   review --> del["User deletion at any stage"]
 ```
+
+Web uses the same stages with a browser file input behind the web `FileValidation` adapter and no local quarantine (the file streams to the server; nothing is persisted in the browser). Web upload is **in the MVP scope** (owner, 2026-10-17) but fail closed behind `NotConfigured` until the security review; controls are in [threat-model §2.5](../security/threat-model.md).
 
 Stage ids (`selection`, `validation`, `quarantine`, `upload`, `review`, `deletion`) are `ClinicalPipelineStage` in code. No picker, upload SDK or scanner exists (CI forbids them outside adapters).
 
@@ -178,16 +181,9 @@ flowchart LR
 
 Today the engine is `packages/domain/eligibility.py` (Python, synthetic, **not tax-law guidance**). Native/web ports are PLANNED; the web port is TypeScript.
 
-### 4.5 AI insights (PLANNED)
+### 4.5 AI insights (DEFERRED to post-MVP, [ADR-0012](../adr/0012-ai-deferred.md))
 
-```mermaid
-flowchart LR
-  rec["User-approved records only"] --> job["AI job service - PLANNED"]
-  job --> vx["Vertex AI - PLANNED"]
-  vx --> out["Advisory summary"]
-  out --> ui["UI shows sources, timestamps, uncertainty, see-a-professional notice"]
-  clin["Untrusted clinical text"] -.->|"prompt-injection risk"| job
-```
+No AI service, SDK or UI ships in the MVP; revisit only if a provider is free and legally approved. If reopened, the constraints stay: user-approved records only, provenance and timestamps, advisory copy, untrusted clinical text isolated from instructions.
 
 ## 5. Module and domain design
 
@@ -237,16 +233,16 @@ apps/web/                      # PLANNED - Next.js + React + TypeScript (ADR-000
   src/core/                    # adapter interfaces, CapabilityStatus, mappers
   src/core/composition-root.ts # only place that constructs adapters
   src/core/adapters/           # NotConfigured* stubs first
-  server/                      # BFF route handlers (session cookies, API proxy) - no business logic
+  server/                      # BFF route handlers (session cookies, API proxy) - no business logic; obtain auth/db/storage only via core/ adapters
 packages/contracts             # JSON Schema; TS types generated from it (PLANNED tooling)
 packages/domain                # eligibility rules; TS port with shared fixtures (PLANNED)
 ```
 
-Web adapter set (subset of native): `IdentitySession` (via BFF), `ConsentStore`, `CrashReporter`, `TelemetryPolicy`, `FileValidation`, `ReportUploadClient`, `ClinicalDocumentPipeline`, `WellnessSyncClient` (manual/import only). Not present on web: `HealthDataSource` (kit), `NfcCapability` (always unavailable), `SecureStore` (no browser equivalent for secrets; tokens never client-side), `BiometricUnlock` (WebAuthn only, PLANNED).
+Web adapter set (subset of native): `IdentitySession` (via BFF), `ConsentStore`, `CrashReporter`, `TelemetryPolicy`, `FileValidation`, `ReportUploadClient`, `ClinicalDocumentPipeline`, `WellnessSyncClient` (manual/import only). Not present on web: `HealthDataSource` (kit), `NfcCapability` (always unavailable), `SecureStore` (no browser equivalent for secrets; tokens never client-side), `BiometricUnlock` (WebAuthn only, PLANNED). Auth SDKs (WebAuthn, OIDC, email), DB and storage SDKs are confined to `apps/web/src/core/` adapters, enforced by `scripts/check-web-patterns.py`.
 
-## 6. Backend target (PLANNED, not deployed)
+## 6. Backend and hosting target (PLANNED, not deployed; [ADR-0011](../adr/0011-hosting-vercel-neon.md))
 
-Cloud Run services split by purpose — identity, health data, clinical documents, expenses, AI jobs, exports — with Firestore for metadata, Vertex AI, Cloud KMS/CMEK, VPC Service Controls and Cloud Armor. Contract-level descriptions: [api-contracts.md](api-contracts.md). No project IDs, regions, or URLs are defined.
+Next.js BFF + API on Vercel Functions pinned to `hnd1` (Tokyo); Vercel-managed Postgres (Neon; no Tokyo region documented, so Singapore is the nearest); private object storage for clinical files (provisional Vercel Blob private); application-level envelope encryption for sensitive fields; no AI service in MVP ([ADR-0012](../adr/0012-ai-deferred.md)). Logical services (identity, health data, clinical documents, expenses, exports) remain separate modules with independent authorization inside the API tier. The earlier Cloud Run / Firestore / Cloud KMS / VPC-SC / Cloud Armor target ([ADR-0006](../adr/0006-backend-target-gcp.md)) is superseded. Verified platform facts, cost, residency and legal review items: [hosting-and-compliance.md](hosting-and-compliance.md). Contract-level API description: [api-contracts.md](api-contracts.md). No project IDs, regions in client code, or URLs are defined.
 
 ## 7. Cross-cutting policies
 
@@ -267,10 +263,11 @@ Cloud Run services split by purpose — identity, health data, clinical document
 | Document selection | Picker behind adapter (STUB) | Picker behind adapter (STUB) | Browser file input behind adapter (PLANNED; CI gate to be extended) |
 | Crash/telemetry | Not configured | Not configured | Not configured; no third-party scripts |
 | Offline cache | Off by default | Off by default | No persistent sensitive cache; no service-worker caching of authenticated responses |
-| Distribution | TestFlight / App Store | Play internal / Play | Hosted site (hosting undecided; Cloud Run target) |
+| Distribution | TestFlight / App Store | Play internal / Play | Vercel (Functions in `hnd1`), [ADR-0011](../adr/0011-hosting-vercel-neon.md) |
 
 ## 9. Open questions
 
 1. Does the official IdP support a web redirect flow for relying parties, and with which assurance? (UNCONFIRMED; owner/legal to confirm from official docs.)
-2. Is the web client at parity for Clinical upload in MVP, or read-only? (Owner decision.)
-3. Hosting for the web app: same Cloud Run project as the BFF, or separate?
+2. ~~Web clinical upload in MVP?~~ **Decided 2026-10-17: yes**, fail closed until security review.
+3. ~~Hosting?~~ **Decided 2026-10-17: Vercel + Neon** ([ADR-0011](../adr/0011-hosting-vercel-neon.md)). Open: master-key custody, object-storage vendor confirmation, Japan-resident database, malware scanner vendor, legal gates ([hosting-and-compliance](hosting-and-compliance.md)).
+4. Web auth method: official IdP web flow if free and supported, else passkeys, else email OTP ([ADR-0010](../adr/0010-web-auth-strategy.md)); IdP web support UNCONFIRMED.

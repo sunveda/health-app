@@ -29,7 +29,7 @@ When a later slice implements the pipeline, the intended order is:
 1. **Selection** — user chooses a report through a Core/platform picker adapter after purpose-tied UX. No permission prompt until that adapter is reviewed.
 2. **Validation** — client-side type and size checks before anything is stored. Principles only: enforce an allowlist and a maximum size; reject archives and executables; never log contents. Exact byte limits and type lists are TBD with product/security. Do not require a named MIME or malware-scanner vendor here.
 3. **Quarantine** — hold metadata (and later, encrypted bytes) locally until upload is approved. Quarantine is not a cache of extracted diagnoses.
-4. **Upload** — resumable, encrypted in transit, to an authorized clinical-document service after that service exists. Do not invent Cloud Storage, S3, or Cloud Run URLs in the client.
+4. **Upload** — encrypted in transit, through the BFF/API (web and native) into a **private** object store quarantine prefix; short-lived signed URLs or authenticated streaming only, never public URLs. Web upload is in MVP scope but fail closed until security review. Do not invent storage hosts or URLs in the client; see [threat-model §2.5](security/threat-model.md).
 5. **Review** — user-facing review of what was accepted before extraction or AI. Contents stay unloggable (see privacy baseline).
 6. **Deletion** — user-initiated delete plus retention-policy delete; both must be testable before the Clinical stage can exit.
 

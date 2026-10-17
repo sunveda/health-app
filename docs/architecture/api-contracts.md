@@ -28,7 +28,7 @@ flowchart LR
   gw --> hsvc["Health data service"]
   gw --> csvc["Clinical documents service"]
   gw --> esvc["Expenses service"]
-  gw --> asvc["AI jobs service"]
+  gw -.-> asvc["AI jobs service - DEFERRED, ADR-0012"]
   gw --> xsvc["Exports service"]
 ```
 
@@ -42,16 +42,19 @@ Operation names are descriptive. "Schema" refers to portal.json objects or a **P
 |---|---|---|---|---|---|
 | Identity | Begin sign-in / complete sign-in / end session | Per official IdP - UNCONFIRMED | Session + `identity` | `identity` | **BLOCKED** |
 | Identity | Read current identity | none | `identity` | `identity` | **BLOCKED** |
+| Web auth (fallback) | Passkey register/authenticate; email OTP request/verify | WebAuthn ceremony payloads; email + code | server session, `authMethod` | PLANNED schema | PLANNED per [ADR-0010](../adr/0010-web-auth-strategy.md); **not My Number identity**; only used if the official IdP web flow is unavailable or not free |
 | Health data | Get wellness sync state | none | `wellnessSync` | `wellnessSync` | PLANNED |
 | Health data | Submit measurements (scopes `steps`, `heartRate` first) | batch of measurements + purposeId | acknowledgment | PLANNED schema | PLANNED; needs consent |
 | Health data | Delete measurements | scope/time range | acknowledgment | PLANNED | PLANNED |
-| Clinical | Create upload session | `declaredType`, `byteSize`, document id | resumable session handle (opaque) | PLANNED | PLANNED; location not defined |
+| Clinical | Create upload session (**web and native, MVP**) | `declaredType`, `byteSize`, document id | short-lived, single-document, single-use upload authorization (opaque; no public URL) | PLANNED | PLANNED; fail closed behind NotConfigured until security review. Server enforces type allowlist and size limit, never trusts the declared values |
+| Clinical | Finalize upload | document id | stage `quarantined`; scan result arrives asynchronously | PLANNED | PLANNED; file is unreadable by the user-facing API until scan passes |
+| Clinical | Download/view own document | document id | authenticated stream through the BFF, `Cache-Control: private, no-store`, `Content-Disposition` attachment, `nosniff`; or short-lived signed URL | PLANNED | PLANNED; never a permanent URL
 | Clinical | Get document status | document id | stage/status (`ClinicalPipelineStage`) | PLANNED | PLANNED |
 | Clinical | Confirm review / delete document | document id | acknowledgment | PLANNED | PLANNED |
 | Expenses | Get expense summary for tax year | `taxYear` | `medicalExpenses` | `medicalExpenses` | PLANNED |
 | Expenses | Put/get lines, evaluate | lines (as `ExpenseLine`) | `EligibilityResult` fields | PLANNED | PLANNED |
 | Exports | Create preview / confirm export | taxYear + explicit user confirmation | preview, then artifact handle | PLANNED | PLANNED; legal TBD |
-| AI | Request insight job / get result | record references | text + sources + timestamps + uncertainty | PLANNED | PLANNED |
+| AI | Request insight job / get result | record references | text + sources + timestamps + uncertainty | DEFERRED | **DEFERRED to post-MVP** ([ADR-0012](../adr/0012-ai-deferred.md)); no endpoint in MVP |
 | Consent | Record / read decision | category, decision, purposeId | acknowledgment | PLANNED | PLANNED |
 
 Aggregate "portal" read: the existing `portal.json` is one object combining `identity`, `wellnessSync`, `medicalExpenses`. Whether that is served as one endpoint or composed by the BFF is **undecided**.
@@ -114,3 +117,13 @@ AuthN via validated session; per-user authorization; consent + purpose check; in
 ## 8. Explicitly not defined here
 
 IdP issuer/endpoints/scopes/claims, client IDs, redirect URIs, card/NFC protocol steps, object-storage locations, scanner vendors, production hostnames. Fill only from official documentation and approved registration.
+
+## 9. Clinical upload contract rules (web and native)
+
+1. Create-session call validates the declared type against a server allowlist (list TBD: SPEC Q4) and the size limit; the server re-checks actual bytes and sniffs content type; a mismatch rejects with `unsupported_type` / `too_large`.
+2. Uploads go to a **private** object store; the authorization is bound to account id, document id, size and expiry (minutes), single use. No public URL exists at any stage.
+3. After upload the object is **quarantined**; a malware scan (vendor TBD) runs before any other service can read it; failures are deleted and the user sees a generic failure.
+4. Filenames are never trusted or logged; storage keys are random.
+5. Rate limits per account; idempotency key on create/finalize.
+6. Web uploads go through the BFF (same-origin, CSRF-protected) or via a signed URL obtained from it; browser code never holds storage credentials.
+7. While the pipeline adapter is `NotConfigured`, every call above returns `not_configured` and no object is created.

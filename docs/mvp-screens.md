@@ -75,7 +75,7 @@ Wellness and clinical **capability surfaces** in one tab: explain intended later
 | Inspect wellness status | Availability + permission state + empty scopes + disabled flag → “Not configured” | Purpose explanation → system read prompt for minimized scopes |
 | Request wellness access | Fail closed (`not configured` / `unavailable`) | `requestReadAccess` for `steps`, `heartRate` only after review |
 | Inspect clinical pipeline status | `not_configured` surface mapping | Selection → validation → quarantine → upload → review → deletion |
-| Start document selection | Fail closed; **no** picker | Core/platform picker adapter after Clinical approval |
+| Start document selection | Fail closed; **no** picker | Core/platform picker adapter (native) and browser file-input adapter (**web, in MVP scope**) after security review |
 | Open purpose / privacy explainer | Placeholder copy + link to Settings privacy section | Final JA/EN legal notices |
 
 ### Data shown (MVP)
@@ -98,7 +98,8 @@ Wellness and clinical **capability surfaces** in one tab: explain intended later
 |---|---|---|
 | Samples list | Empty | User-visible measurements with timestamps; never log raw samples |
 | Sync | WellnessSyncClient no-op | Backend sync only after API design + consent |
-| Upload CTA | Hidden or disabled with explanation | Resumable encrypted upload to authorized service (**URL TBD — do not invent**) |
+| Upload CTA | Hidden or disabled with explanation | Encrypted upload through the BFF/API into private quarantine storage (**URL TBD — do not invent**); same on web |
+| Upload result states | n/a | `quarantined` (scanning) → `accepted` for review, or generic `rejected`; messages for `too_large` / `unsupported_type`; never shows file contents in lists |
 
 ---
 
@@ -204,14 +205,29 @@ These are **not** separate tabs; they appear as sheets or sections from Home / S
 
 ---
 
+## 5b. Web client screen notes (owner scope 2026-10-17; PLANNED)
+
+Same four tabs as responsive layouts. Differences from native:
+
+| Topic | Web behavior |
+|---|---|
+| Sign-in screen | Shows which method applies: official IdP web flow (only if confirmed free and supported, UNCONFIRMED), else passkey, else email one-time code. **Fallback methods are labelled "account sign-in", never "My Number verified"**; identity-gated actions stay disabled for them |
+| Health tab: wellness | No device sync; manual entry or file import only; copy explains why |
+| Health tab: clinical upload | **In MVP scope.** File chooser behind adapter; client shows type/size limits as hints (server enforces); states: not configured → uploading → quarantined/scanning → ready for review / rejected → deleted. Disabled with "Not configured" until security review |
+| Settings | Shows session method, active sessions and sign-out; data deletion entry |
+| Accessibility | Keyboard-operable file input and status announcements (`aria-live`) |
+| Never on web | NFC card reading, persistent local storage of identity/health data, third-party scripts |
+
+---
+
 ## 6. Screen → stage mapping
 
 | Screen | Hygiene | Sec/privacy | Identity | Wellness | Clinical | Expenses | AI |
 |---|---|---|---|---|---|---|---|
-| Home | Shell | Status honesty | Blocked CTA | Status line | Status line | Link | Later insights teaser |
-| Health | Shell | Redaction | — | Stub → real reads | Stub → pipeline | — | Provenance views later |
+| Home | Shell | Status honesty | Blocked CTA | Status line | Status line | Link | Deferred (ADR-0012) |
+| Health | Shell | Redaction | — | Stub → real reads | Stub → pipeline (native + web) | — | Deferred |
 | Expenses | Shell | Export gate | — | — | — | Fixtures → deepen | — |
-| Settings | Shell | Consent/crash/telemetry UI | Auth placeholder | Flag display | Pipeline display | — | AI safety prefs later |
+| Settings | Shell | Consent/crash/telemetry UI | Auth placeholder (web: method per ADR-0010) | Flag display | Pipeline display | — | Deferred |
 
 ---
 
@@ -223,8 +239,9 @@ These are **not** separate tabs; they appear as sheets or sections from Home / S
 - [ ] Expenses uses synthetic fixtures + disclaimer; export disabled or gated  
 - [ ] Settings shows crash/telemetry not configured and Identity blocked  
 - [ ] No screen imports kits / pickers / IdP SDKs directly  
+- [ ] Web: clinical upload shown disabled/not configured until review; no public file URLs; fallback auth never labelled My Number verified
 - [ ] Examples and UI previews contain no real PII or health payloads  
 
 ---
 
-*Last updated: 2026-09-29 (Asia/Tokyo).*
+*Last updated: 2026-10-17 (Asia/Tokyo): web screens and web clinical upload scope added.*

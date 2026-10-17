@@ -1,6 +1,6 @@
 # Development and test guide
 
-**Last updated:** 2026-10-17. Commands below are the ones used by `.github/workflows/native-ci.yml` or documented in the repo READMEs. Web items are **PLANNED** (`apps/web` does not exist yet).
+**Last updated:** 2026-10-17. Commands below are the ones used by `.github/workflows/native-ci.yml`, `.github/workflows/web-ci.yml` or documented in the repo READMEs. Web app items are **PLANNED** (`apps/web` does not exist yet); web CI gates are **BUILT** and conditional.
 
 Docs-first mode applies ([ADR-0005](adr/0005-docs-first.md)): no feature coding until the SPEC.md row is owner-approved.
 
@@ -12,7 +12,7 @@ Docs-first mode applies ([ADR-0005](adr/0005-docs-first.md)): no feature coding 
 | iOS | macOS, Xcode 15+, [XcodeGen](https://github.com/yonaskolb/XcodeGen) (`brew install xcodegen`); iOS 17.0 deployment target, Swift 5.9 |
 | Android | JDK 17 (Temurin in CI), Android SDK (compile/target 35, min 26), Gradle 8.10, AGP 8.7.3, Kotlin 2.0.21 |
 | Workspace | pnpm 10.12.1 (`packageManager`), Node for workspace tooling (Prettier ^3.6, TypeScript ^5.9 dev deps) |
-| Web (PLANNED) | Node LTS + pnpm; framework per [ADR-0008](adr/0008-web-client-stack.md) |
+| Web (PLANNED) | Node LTS + pnpm; Next.js per [ADR-0008](adr/0008-web-client-stack.md) (Accepted); hosting [ADR-0011](adr/0011-hosting-vercel-neon.md) |
 
 Do not commit secrets, signing material, or filled `.env`. Use `.env.example` names only (`HEALTH_APP_API_BASE_URL`, `HEALTH_APP_OIDC_ISSUER`, `HEALTH_APP_OIDC_CLIENT_ID`, `HEALTH_APP_OIDC_REDIRECT_URI`).
 
@@ -39,6 +39,10 @@ python3 -m unittest discover -s packages/domain -t packages/domain -p 'test_*.py
 
 # iOS simulator destination resolver tests
 python3 -m unittest discover -s scripts -t scripts -p 'test_ios_simulator_destination.py'
+
+# web gates (pass with "apps/web not present" until the app exists)
+python3 -m unittest discover -s scripts -t scripts -p 'test_check_web_patterns.py'
+python3 scripts/check-web-patterns.py
 ```
 
 ### Android
@@ -70,21 +74,23 @@ Never use `generic/platform=iOS Simulator` for tests; it cannot run them.
 
 ### Web (PLANNED)
 
-Install, typecheck, lint, unit test, build, and E2E jobs to be added to CI with `apps/web`. Until then none exist; do not document commands that do not exist.
+The app does not exist, so there are no app commands yet. **The web CI gates do exist** and are conditional: `.github/workflows/web-ci.yml` always runs the checker tests and `scripts/check-web-patterns.py`; once `apps/web/package.json` exists it also runs `pnpm install --frozen-lockfile --ignore-scripts`, `pnpm audit --prod --audit-level=high`, and the app's `typecheck`, `lint`, `test`, `build` scripts (missing scripts are skipped, so the app must define them). Playwright E2E is a later addition. Do not scaffold `apps/web` before the owner approves the matching SPEC rows and Identity/clinical stages stay behind `NotConfigured`.
+
+Web conventions: SDKs for auth (WebAuthn/OIDC/email), Postgres and object storage may be imported **only** under `apps/web/src/core/`; stub adapters are constructed **only** in `apps/web/src/core/composition-root.ts`; Preview and local environments use synthetic data and separate credentials; never commit `.env*` files except `.env.example`.
 
 ## 3. CI jobs
 
-`Native CI` runs on pull requests and pushes to `main`: **contracts** job (JSON validate, whitespace, forbidden patterns, domain tests, simulator resolver tests) → **android** and **ios** jobs (both `needs: contracts`). Merge gate used so far: all three green.
+`Web CI` (`web-ci.yml`) runs on the same triggers with one job (`web-gates`) that is green when `apps/web` is absent. `Native CI` runs on pull requests and pushes to `main`: **contracts** job (JSON validate, whitespace, forbidden patterns, domain tests, simulator resolver tests) → **android** and **ios** jobs (both `needs: contracts`). Merge gate used so far: all three green.
 
 ## 4. Forbidden-pattern gates
 
 `scripts/check-forbidden-patterns.py` scans tracked files and fails on:
 
-- `EXPO_PUBLIC_`, PEM private-key headers, obvious secret assignments and token prefixes (all files)
+- the Expo public-env prefix, PEM private-key headers, obvious secret assignments and token prefixes (all files)
 - HealthKit, CoreNFC, LocalAuthentication, Security/Keychain, Health Connect, BiometricPrompt, Android Keystore, Android NFC, iOS/Android document/photo pickers, AWS/GCP/Firebase storage SDKs, hardcoded object-storage URLs — **outside** `apps/ios/HealthApp/Core/` and `apps/android/.../platform/`
 - `NotConfigured*` / `Unavailable*` / `InMemory*` constructors outside the CompositionRoot files (unit tests exempt)
 
-Gaps: nothing covers web yet (see [threat-model §3](security/threat-model.md)); the checks are regex based.
+Web: `scripts/check-web-patterns.py` (see [threat-model §3](security/threat-model.md) item 11) fails on browser storage, `document.cookie`, XSS sinks, third-party script tags, secret-like `NEXT_PUBLIC_` names, token-like strings, credentialed database URLs, public blob access or hardcoded storage hosts, auth/db/storage/email SDK imports outside `apps/web/src/core/`, stub constructors outside the composition root, committed `.env*`, unpinned/git dependencies, install lifecycle scripts and a missing lockfile; tests (`*.test.*`, `__tests__`, `e2e`) are exempt from source rules. Gaps: all checks are regex based tripwires; they do not replace review.
 
 ## 5. How to add a feature behind the CompositionRoot
 

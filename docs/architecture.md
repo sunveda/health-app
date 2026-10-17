@@ -54,7 +54,7 @@ Apple Developer Program membership, App Store Connect / TestFlight, Google Play 
 
 ## Backend target
 
-The supplied specification proposes Cloud Run for containerized services, Firestore for user health metadata and longitudinal profiles, Vertex AI for AI-assisted processing, Cloud KMS with CMEK for key management, and VPC Service Controls plus Cloud Armor for perimeter and ingress protection. These are target decisions, not yet deployed infrastructure. The backend should be split into independently authorized services for identity, health data, clinical documents, expenses, AI jobs, and exports.
+**Updated 2026-10-17:** the original specification proposed Cloud Run, Firestore, Vertex AI, Cloud KMS/CMEK, VPC Service Controls and Cloud Armor. The owner has since chosen Vercel (Next.js BFF/API) with Vercel-managed Postgres (Neon), and deferred AI to post-MVP; see [ADR-0011](adr/0011-hosting-vercel-neon.md), [ADR-0012](adr/0012-ai-deferred.md) and [hosting-and-compliance](architecture/hosting-and-compliance.md). These are target decisions, not yet deployed infrastructure. The backend should be split into independently authorized services for identity, health data, clinical documents, expenses, AI jobs, and exports.
 
 Sensitive values should be partitioned by purpose. The pairwise subject identifier is the application-facing identity key. Direct identifiers and the individual number should be isolated from general health records, encrypted with managed keys, and accessed only by narrowly authorized services. The mobile app should receive the minimum data required for each screen and should not persist the individual number unless a reviewed product requirement makes this unavoidable.
 

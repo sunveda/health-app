@@ -1,16 +1,16 @@
 # ADR-0008: Web client — Next.js + React + TypeScript with a BFF
 
-**Status:** Proposed (owner approval needed) · **Date:** 2026-10-17
+**Status:** Accepted (owner decision 2026-10-17: Next.js + BFF approved) · **Date:** 2026-10-17
 
 ## Context
 
 The owner requires the product to ship as **web + iOS + Android**. The web client must share `packages/contracts` and `packages/domain` rules, use the same CompositionRoot + NotConfigured adapter pattern, and meet a stricter token-handling bar than native (no secure local store in browsers). Identity remains blocked, so the web client cannot sign in against a real IdP yet. `apps/web` does not exist today.
 
-Requirements that drive the choice: server-side session boundary (BFF with httpOnly cookies), strict CSP with nonces, TypeScript sharing with the existing pnpm workspace (`apps/*`, `packages/*`), hosting alignment with the Cloud Run backend target, and mature ecosystem with active security maintenance.
+Requirements that drive the choice: server-side session boundary (BFF with httpOnly cookies), strict CSP with nonces, TypeScript sharing with the existing pnpm workspace (`apps/*`, `packages/*`), hosting per ADR-0011 (Vercel), and mature ecosystem with active security maintenance.
 
-## Decision (recommended)
+## Decision
 
-**Next.js (App Router) + React + TypeScript (strict)**, deployed as a Node container (Cloud Run target), with route handlers acting as the **BFF** (OIDC relying party design, session cookies, same-origin API proxy). Package manager: pnpm (already pinned). Render authenticated pages dynamically with `no-store`; CSP via middleware with per-request nonces. Tests: Vitest + Testing Library for units, Playwright for E2E (to be confirmed at implementation). `apps/web` mirrors the native layering: `core/` interfaces + `composition-root.ts` + `NotConfigured*` adapters, features consume dependencies only.
+**Next.js (App Router) + React + TypeScript (strict)**, deployed on Vercel Functions ([ADR-0011](0011-hosting-vercel-neon.md); this supersedes the earlier Cloud Run assumption), with route handlers acting as the **BFF** (OIDC relying party design, session cookies, same-origin API proxy). Package manager: pnpm (already pinned). Render authenticated pages dynamically with `no-store`; CSP via middleware with per-request nonces. Tests: Vitest + Testing Library for units, Playwright for E2E (to be confirmed at implementation). `apps/web` mirrors the native layering: `core/` interfaces + `composition-root.ts` + `NotConfigured*` adapters, features consume dependencies only.
 
 Why this over alternatives: the BFF and the UI live in one deployable with server-rendered, nonce-able CSP and cookie handling built in; one language across web UI, BFF, and the TS domain port; no separate gateway needed to keep tokens out of the browser.
 
@@ -33,4 +33,4 @@ Why this over alternatives: the BFF and the UI live in one deployable with serve
 | **Kotlin/Wasm or Flutter Web** | Code share with native | Rejected: contradicts "share contracts not UI", poor a11y/CSP story |
 | **PWA only, no server** | Cheap | Cannot keep tokens out of the browser; violates ADR-0009 |
 
-Final framework choice is an owner decision; the BFF + cookie requirement (ADR-0009) is the constraint that must hold under any option.
+The owner approved Next.js + BFF on 2026-10-17. The BFF + cookie requirement (ADR-0009) is the constraint that must hold under any option.

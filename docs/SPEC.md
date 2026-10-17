@@ -32,8 +32,8 @@ This file is the **table of contents for what we will specify**. It does not inv
 | S7 | Wellness (device health) | Scopes, consent UX, sync flag | **Intent only** | [wellness-baseline.md](wellness-baseline.md) |
 | S8 | Clinical documents | Upload → validate → quarantine → review | **Intent only** | [clinical-baseline.md](clinical-baseline.md) |
 | S9 | Medical expenses | Eligibility rules, export confirmation | **Fixtures only** | `packages/domain` (synthetic; not tax law) |
-| S10 | AI insights | Grounding, provenance, disclaimers | **Needs draft** | architecture AI boundary |
-| S11 | Backend services | Cloud Run split, Firestore, KMS, Armor | **Target sketch** | architecture “Backend target” |
+| S10 | AI insights | Grounding, provenance, disclaimers | **Deferred** to post-MVP; revisit only if free ([ADR-0012](adr/0012-ai-deferred.md)) | architecture AI boundary |
+| S11 | Backend services | Vercel Functions BFF/API, Neon Postgres, private storage, field encryption | **Target sketch** (GCP plan superseded) | [ADR-0011](adr/0011-hosting-vercel-neon.md), [hosting-and-compliance](architecture/hosting-and-compliance.md) |
 | S12 | Release & stores | Signing, TestFlight, Play internal | **Checklist** | [release-checklist.md](release-checklist.md) |
 | S13 | Observability & IR | Crash/telemetry policy, incident response | **Partial** | privacy crash decision; IR TBD |
 | S14 | Accessibility & i18n | JP-first copy, a11y acceptance | **Needs draft** | — |
@@ -44,7 +44,8 @@ This file is the **table of contents for what we will specify**. It does not inv
 | S19 | Threat model | STRIDE per component/flow, web controls, residual risk | **Draft** | [security/threat-model.md](security/threat-model.md) |
 | S20 | ADRs | Decision records | **Draft** | [adr/README.md](adr/README.md) |
 | S21 | Developer & test guide | Prereqs, commands, gates, PR workflow | **Draft** | [development.md](development.md) |
-| S22 | Web client (apps/web) | TypeScript web app, BFF, parity with native; web platform limits | **Needs owner approval** (planned, not started) | [ADR-0008](adr/0008-web-client-stack.md), [ADR-0009](adr/0009-web-session-and-token-handling.md), [system-architecture §5.4, §8](architecture/system-architecture.md) |
+| S22 | Web client (apps/web) | TypeScript web app, BFF, parity with native; web platform limits | **Stack approved 2026-10-17** (Next.js + BFF); planned, not started; clinical upload in MVP; auth per [ADR-0010](adr/0010-web-auth-strategy.md) | [ADR-0008](adr/0008-web-client-stack.md), [ADR-0009](adr/0009-web-session-and-token-handling.md), [system-architecture §5.4, §8](architecture/system-architecture.md) |
+| S23 | Hosting, residency & compliance | Vercel + Neon facts, cost, legal review list, gates before real data | **Draft** | [architecture/hosting-and-compliance.md](architecture/hosting-and-compliance.md), [ADR-0011](adr/0011-hosting-vercel-neon.md) |
 
 Status legend: **Needs draft** → **Draft** → **Owner-approved** → **Ready to implement**. **Blocked** cannot move to implement without external approval.
 
@@ -86,7 +87,7 @@ Capture answers in CONTEXT when decided; do not encode guesses into schemas.
 
 1. Primary launch language(s) and region assumptions beyond Japan My Number context?
 2. Which store tracks first (TestFlight vs Play internal) and account ownership?
-3. Is Vertex AI in scope for v1, or post-expenses?
+3. ~~Is Vertex AI in scope for v1?~~ **Decided 2026-10-17: deferred to post-MVP; revisit only if free** ([ADR-0012](adr/0012-ai-deferred.md)).
 4. Must the individual number ever appear on-device, or pairwise-sub only?
 5. Expense feature: informational eligibility only, or export toward a specific tax workflow?
 
@@ -101,4 +102,4 @@ Capture answers in CONTEXT when decided; do not encode guesses into schemas.
 - [architecture.md](architecture.md) — staged delivery  
 - Root [AGENTS.md](../AGENTS.md) — agent operating rules  
 
-*Last updated: 2026-10-17*
+*Last updated: 2026-10-17 (owner decisions on web stack, auth, hosting, AI applied)*
