@@ -22,8 +22,9 @@ This file is the **table of contents for what we will specify**. It does not inv
 | ID | Spec | Purpose | Status | Source of truth today |
 |---|---|---|---|---|
 | S0 | Stack & boundaries | One-screen tech + system map | **Draft** | [STACK.md](STACK.md), [architecture.md](architecture.md) |
-| S1 | Product vision & non-goals | Who it is for, what we refuse to build | **Needs draft** | CONTEXT one-liner only |
-| S2 | Information architecture | Screens, tabs, empty/error/blocked states | **Needs draft** | Feature tab shells in code (no UX spec) |
+| S1 | Product vision & non-goals | Who it is for, what we refuse to build | **Draft** | [product-spec.md](product-spec.md) |
+| S2 | Information architecture | Screens, tabs, empty/error/blocked states | **Draft** | [mvp-screens.md](mvp-screens.md) |
+| S2b | Technical specification | Layout, adapters, built-vs-stub, staging, CI gates | **Draft** | [technical-spec.md](technical-spec.md) |
 | S3 | Shared contracts | JSON Schema for portal payloads | **Scaffold** | `packages/contracts/schemas/portal.json` |
 | S4 | Security & threat model | Controls, checklist, fail-closed rules | **Baseline draft** | [security.md](security.md) |
 | S5 | Privacy & data classification | Categories, device boundary, logging | **Baseline draft** | [privacy-baseline.md](privacy-baseline.md) |
@@ -31,12 +32,20 @@ This file is the **table of contents for what we will specify**. It does not inv
 | S7 | Wellness (device health) | Scopes, consent UX, sync flag | **Intent only** | [wellness-baseline.md](wellness-baseline.md) |
 | S8 | Clinical documents | Upload → validate → quarantine → review | **Intent only** | [clinical-baseline.md](clinical-baseline.md) |
 | S9 | Medical expenses | Eligibility rules, export confirmation | **Fixtures only** | `packages/domain` (synthetic; not tax law) |
-| S10 | AI insights | Grounding, provenance, disclaimers | **Needs draft** | architecture AI boundary |
-| S11 | Backend services | Cloud Run split, Firestore, KMS, Armor | **Target sketch** | architecture “Backend target” |
+| S10 | AI insights | Grounding, provenance, disclaimers | **Deferred** to post-MVP; revisit only if free ([ADR-0012](adr/0012-ai-deferred.md)) | architecture AI boundary |
+| S11 | Backend services | Vercel Functions BFF/API, Neon Postgres, private storage, field encryption | **Target sketch** (GCP plan superseded) | [ADR-0011](adr/0011-hosting-vercel-neon.md), [hosting-and-compliance](architecture/hosting-and-compliance.md) |
 | S12 | Release & stores | Signing, TestFlight, Play internal | **Checklist** | [release-checklist.md](release-checklist.md) |
 | S13 | Observability & IR | Crash/telemetry policy, incident response | **Partial** | privacy crash decision; IR TBD |
 | S14 | Accessibility & i18n | JP-first copy, a11y acceptance | **Needs draft** | — |
-| S15 | Testing & CI gates | Required checks per stage | **Partial** | `.github/workflows/native-ci.yml` |
+| S15 | Testing & CI gates | Required checks per stage | **Partial** | `.github/workflows/native-ci.yml`, [development.md](development.md) |
+| S16 | System architecture | Context, components, data flows, module design, platform limits | **Draft** | [architecture/system-architecture.md](architecture/system-architecture.md) |
+| S17 | Data model | Entities, classification, device/backend partition, retention | **Draft** | [architecture/data-model.md](architecture/data-model.md) |
+| S18 | API contracts | Contract-level planned services, error model, versioning | **Draft** (planned; IdP **Blocked**) | [architecture/api-contracts.md](architecture/api-contracts.md) |
+| S19 | Threat model | STRIDE per component/flow, web controls, residual risk | **Draft** | [security/threat-model.md](security/threat-model.md) |
+| S20 | ADRs | Decision records | **Draft** | [adr/README.md](adr/README.md) |
+| S21 | Developer & test guide | Prereqs, commands, gates, PR workflow | **Draft** | [development.md](development.md) |
+| S22 | Web client (apps/web) | TypeScript web app, BFF, parity with native; web platform limits | **Stack approved 2026-10-17** (Next.js + BFF); planned, not started; clinical upload in MVP; auth per [ADR-0010](adr/0010-web-auth-strategy.md) | [ADR-0008](adr/0008-web-client-stack.md), [ADR-0009](adr/0009-web-session-and-token-handling.md), [system-architecture §5.4, §8](architecture/system-architecture.md) |
+| S23 | Hosting, residency & compliance | Vercel + Neon facts, cost, legal review list, gates before real data | **Draft** | [architecture/hosting-and-compliance.md](architecture/hosting-and-compliance.md), [ADR-0011](adr/0011-hosting-vercel-neon.md) |
 
 Status legend: **Needs draft** → **Draft** → **Owner-approved** → **Ready to implement**. **Blocked** cannot move to implement without external approval.
 
@@ -78,7 +87,7 @@ Capture answers in CONTEXT when decided; do not encode guesses into schemas.
 
 1. Primary launch language(s) and region assumptions beyond Japan My Number context?
 2. Which store tracks first (TestFlight vs Play internal) and account ownership?
-3. Is Vertex AI in scope for v1, or post-expenses?
+3. ~~Is Vertex AI in scope for v1?~~ **Decided 2026-10-17: deferred to post-MVP; revisit only if free** ([ADR-0012](adr/0012-ai-deferred.md)).
 4. Must the individual number ever appear on-device, or pairwise-sub only?
 5. Expense feature: informational eligibility only, or export toward a specific tax workflow?
 
@@ -86,9 +95,11 @@ Capture answers in CONTEXT when decided; do not encode guesses into schemas.
 
 ## Related
 
+- [product-spec.md](product-spec.md), [technical-spec.md](technical-spec.md), [mvp-screens.md](mvp-screens.md) — draft specs
+- [architecture/](architecture/system-architecture.md), [security/threat-model.md](security/threat-model.md), [adr/](adr/README.md), [development.md](development.md) — architecture & design set
 - [CONTEXT.md](CONTEXT.md) — living status  
 - [STACK.md](STACK.md) — tech one-pager  
 - [architecture.md](architecture.md) — staged delivery  
 - Root [AGENTS.md](../AGENTS.md) — agent operating rules  
 
-*Last updated: 2026-09-29*
+*Last updated: 2026-10-17 (owner decisions on web stack, auth, hosting, AI applied)*

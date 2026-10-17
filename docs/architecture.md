@@ -5,6 +5,8 @@
 This document turns the initial product specification into a staged architecture for a mobile client serving iOS and Android. It separates the device experience from the cloud trust boundary so that native permissions, identity verification, health-data ingestion, AI processing, and tax workflows can be reviewed independently.
 
 **One-screen tech map:** [STACK.md](STACK.md). **Specification index (docs-first):** [SPEC.md](SPEC.md).
+**Web client (planned, 2026-10-17):** the owner added a web app to scope alongside iOS and Android. It is not in the repo yet; design lives in [architecture/system-architecture.md](architecture/system-architecture.md), [adr/0008](adr/0008-web-client-stack.md), [adr/0009](adr/0009-web-session-and-token-handling.md). Detailed diagrams, data model, API contracts and threat model are in `docs/architecture/` and `docs/security/`.
+
 ## System boundaries
 
 | Boundary | Initial responsibility | Data sensitivity |
@@ -52,7 +54,7 @@ Apple Developer Program membership, App Store Connect / TestFlight, Google Play 
 
 ## Backend target
 
-The supplied specification proposes Cloud Run for containerized services, Firestore for user health metadata and longitudinal profiles, Vertex AI for AI-assisted processing, Cloud KMS with CMEK for key management, and VPC Service Controls plus Cloud Armor for perimeter and ingress protection. These are target decisions, not yet deployed infrastructure. The backend should be split into independently authorized services for identity, health data, clinical documents, expenses, AI jobs, and exports.
+**Updated 2026-10-17:** the original specification proposed Cloud Run, Firestore, Vertex AI, Cloud KMS/CMEK, VPC Service Controls and Cloud Armor. The owner has since chosen Vercel (Next.js BFF/API) with Vercel-managed Postgres (Neon), and deferred AI to post-MVP; see [ADR-0011](adr/0011-hosting-vercel-neon.md), [ADR-0012](adr/0012-ai-deferred.md) and [hosting-and-compliance](architecture/hosting-and-compliance.md). These are target decisions, not yet deployed infrastructure. The backend should be split into independently authorized services for identity, health data, clinical documents, expenses, AI jobs, and exports.
 
 Sensitive values should be partitioned by purpose. The pairwise subject identifier is the application-facing identity key. Direct identifiers and the individual number should be isolated from general health records, encrypted with managed keys, and accessed only by narrowly authorized services. The mobile app should receive the minimum data required for each screen and should not persist the individual number unless a reviewed product requirement makes this unavoidable.
 
