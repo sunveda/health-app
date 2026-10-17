@@ -179,7 +179,13 @@ Per architecture: Cloud Run services, Firestore for health metadata, Vertex AI f
 
 These are **targets**, not current implementations. Clients must not hardcode service URLs.
 
+## 9b. Web client (PLANNED)
+
+Owner scope (2026-10-17): ship as web + iOS + Android. `apps/web` is not in the repo. Proposed design: [ADR-0008](adr/0008-web-client-stack.md), [ADR-0009](adr/0009-web-session-and-token-handling.md), [system-architecture §5.4](architecture/system-architecture.md). Same CompositionRoot + NotConfigured pattern; web CI gates must be added first.
+
 ## 10. Related links
+
+- Architecture set: [system-architecture](architecture/system-architecture.md), [data-model](architecture/data-model.md), [api-contracts](architecture/api-contracts.md), [threat-model](security/threat-model.md), [ADRs](adr/README.md), [development](development.md)
 
 | Doc | Role |
 |---|---|

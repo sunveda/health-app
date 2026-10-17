@@ -10,7 +10,7 @@ Do not put secrets here. Env var *names* and where they live are fine. Never log
 
 ## What this product is
 
-**My Number Health & Wellness Portal** — native mobile monorepo (iOS SwiftUI + Android Kotlin/Compose) for Japan My Number–related health & wellness flows. Platforms share contracts, not UI.
+**My Number Health & Wellness Portal** — native mobile monorepo (iOS SwiftUI + Android Kotlin/Compose) for Japan My Number–related health & wellness flows. Platforms (web planned, iOS, Android) share contracts, not UI.
 
 Repo: https://github.com/sunveda/health-app
 
@@ -42,6 +42,7 @@ Repo: https://github.com/sunveda/health-app
 - Allowed PRs: STACK/SPEC/architecture/security/privacy drafts, CONTEXT updates, trivial AGENTS/README links, owner-requested security fixes.
 - Disallowed: inventing endpoints/scopes/credentials; new feature UI or kit wiring.
 
+- **2026-10-17 (PR #28):** Added architecture & design docs: [system-architecture](architecture/system-architecture.md), [data-model](architecture/data-model.md), [api-contracts](architecture/api-contracts.md), [threat-model](security/threat-model.md), [ADRs 0001-0009](adr/README.md), [development guide](development.md). **Owner scope addition: ship as web + iOS + Android.** Web is **planned only** (`apps/web` not created); proposed stack Next.js + React + TS with BFF/httpOnly cookies (ADR-0008/0009, awaiting owner approval). Web has no HealthKit/Health Connect/NFC equivalent; Identity still blocked. Still no feature coding.
 - **Draft specs added (pending owner review):** [product-spec.md](product-spec.md) (S1), [technical-spec.md](technical-spec.md), [mvp-screens.md](mvp-screens.md) (S2). Identity remains blocked; no feature coding.
 
 ### `main` (approx.)
@@ -77,6 +78,8 @@ Repo: https://github.com/sunveda/health-app
 - [STACK.md](STACK.md) — **one-screen tech map**
 - [SPEC.md](SPEC.md) — specification index & writing order
 - [architecture.md](architecture.md)
+- [architecture/system-architecture.md](architecture/system-architecture.md), [data-model](architecture/data-model.md), [api-contracts](architecture/api-contracts.md)
+- [security/threat-model.md](security/threat-model.md), [adr/README.md](adr/README.md), [development.md](development.md)
 - [security.md](security.md)
 - [privacy-baseline.md](privacy-baseline.md)
 - [wellness-baseline.md](wellness-baseline.md)

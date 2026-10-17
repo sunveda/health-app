@@ -37,7 +37,14 @@ This file is the **table of contents for what we will specify**. It does not inv
 | S12 | Release & stores | Signing, TestFlight, Play internal | **Checklist** | [release-checklist.md](release-checklist.md) |
 | S13 | Observability & IR | Crash/telemetry policy, incident response | **Partial** | privacy crash decision; IR TBD |
 | S14 | Accessibility & i18n | JP-first copy, a11y acceptance | **Needs draft** | — |
-| S15 | Testing & CI gates | Required checks per stage | **Partial** | `.github/workflows/native-ci.yml` |
+| S15 | Testing & CI gates | Required checks per stage | **Partial** | `.github/workflows/native-ci.yml`, [development.md](development.md) |
+| S16 | System architecture | Context, components, data flows, module design, platform limits | **Draft** | [architecture/system-architecture.md](architecture/system-architecture.md) |
+| S17 | Data model | Entities, classification, device/backend partition, retention | **Draft** | [architecture/data-model.md](architecture/data-model.md) |
+| S18 | API contracts | Contract-level planned services, error model, versioning | **Draft** (planned; IdP **Blocked**) | [architecture/api-contracts.md](architecture/api-contracts.md) |
+| S19 | Threat model | STRIDE per component/flow, web controls, residual risk | **Draft** | [security/threat-model.md](security/threat-model.md) |
+| S20 | ADRs | Decision records | **Draft** | [adr/README.md](adr/README.md) |
+| S21 | Developer & test guide | Prereqs, commands, gates, PR workflow | **Draft** | [development.md](development.md) |
+| S22 | Web client (apps/web) | TypeScript web app, BFF, parity with native; web platform limits | **Needs owner approval** (planned, not started) | [ADR-0008](adr/0008-web-client-stack.md), [ADR-0009](adr/0009-web-session-and-token-handling.md), [system-architecture §5.4, §8](architecture/system-architecture.md) |
 
 Status legend: **Needs draft** → **Draft** → **Owner-approved** → **Ready to implement**. **Blocked** cannot move to implement without external approval.
 
@@ -88,9 +95,10 @@ Capture answers in CONTEXT when decided; do not encode guesses into schemas.
 ## Related
 
 - [product-spec.md](product-spec.md), [technical-spec.md](technical-spec.md), [mvp-screens.md](mvp-screens.md) — draft specs
+- [architecture/](architecture/system-architecture.md), [security/threat-model.md](security/threat-model.md), [adr/](adr/README.md), [development.md](development.md) — architecture & design set
 - [CONTEXT.md](CONTEXT.md) — living status  
 - [STACK.md](STACK.md) — tech one-pager  
 - [architecture.md](architecture.md) — staged delivery  
 - Root [AGENTS.md](../AGENTS.md) — agent operating rules  
 
-*Last updated: 2026-09-29*
+*Last updated: 2026-10-17*

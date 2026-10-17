@@ -13,7 +13,7 @@ Cross-links (do not contradict): [`architecture.md`](architecture.md), [`securit
 
 ## 1. Vision
 
-Japan residents should be able to authenticate with the official My Number identity path (**when approved**), bring together wellness measurements and clinical documents they choose to share, understand medical-expense eligibility with transparent fixtures and confirmation, and receive grounded, non-diagnostic AI insights — all inside native iOS and Android apps that fail closed on identity and health data until every integration is reviewed.
+Japan residents should be able to authenticate with the official My Number identity path (**when approved**), bring together wellness measurements and clinical documents they choose to share, understand medical-expense eligibility with transparent fixtures and confirmation, and receive grounded, non-diagnostic AI insights — all inside native iOS and Android apps (and a planned web app) that fail closed on identity and health data until every integration is reviewed.
 
 The product is a **portal**, not a clinical device or a tax-advice engine: it orchestrates consent, permissions, review, and export. Medical and tax decisions stay with qualified professionals and the user’s own filings.
 
@@ -32,6 +32,7 @@ The product is a **portal**, not a clinical device or a tax-advice engine: it or
 |---|---|---|
 | iOS | SwiftUI (`apps/ios`) | HealthKit, Keychain, LocalAuthentication, CoreNFC — **only** via Core adapters from CompositionRoot |
 | Android | Kotlin + Jetpack Compose (`apps/android`) | Health Connect, Keystore, BiometricPrompt, NFC — **only** via platform adapters from CompositionRoot |
+| Web (**PLANNED**, owner scope 2026-10-17) | TypeScript + React (`apps/web`, not yet created; [ADR-0008](adr/0008-web-client-stack.md)) | No HealthKit/Health Connect/NFC equivalent: wellness is manual entry or file import only; tokens server-side via BFF; WebAuthn for local re-entry. See [platform limits](architecture/system-architecture.md#8-platform-limits-matrix) |
 
 Shared: `packages/contracts` (JSON Schemas), `packages/domain` (synthetic medical-expense eligibility fixtures). **No shared UI.** Bundle / application ID: `com.sunveda.healthapp` (see release checklist).
 

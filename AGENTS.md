@@ -9,7 +9,8 @@ Operating notes for any coding agent working in this repository.
 3. **[docs/SPEC.md](docs/SPEC.md)** — specification index and docs-first writing order.
 4. [README.md](README.md)
 5. Draft specs: [product-spec](docs/product-spec.md), [technical-spec](docs/technical-spec.md), [mvp-screens](docs/mvp-screens.md)
-6. [docs/architecture.md](docs/architecture.md), [docs/security.md](docs/security.md), [docs/privacy-baseline.md](docs/privacy-baseline.md)
+6. Architecture & design: [system-architecture](docs/architecture/system-architecture.md), [data-model](docs/architecture/data-model.md), [api-contracts](docs/architecture/api-contracts.md), [threat-model](docs/security/threat-model.md), [ADRs](docs/adr/README.md), [development guide](docs/development.md)
+7. [docs/architecture.md](docs/architecture.md), [docs/security.md](docs/security.md), [docs/privacy-baseline.md](docs/privacy-baseline.md)
 
 ## Product in one line
 

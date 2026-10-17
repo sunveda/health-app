@@ -5,6 +5,8 @@
 This document turns the initial product specification into a staged architecture for a mobile client serving iOS and Android. It separates the device experience from the cloud trust boundary so that native permissions, identity verification, health-data ingestion, AI processing, and tax workflows can be reviewed independently.
 
 **One-screen tech map:** [STACK.md](STACK.md). **Specification index (docs-first):** [SPEC.md](SPEC.md).
+**Web client (planned, 2026-10-17):** the owner added a web app to scope alongside iOS and Android. It is not in the repo yet; design lives in [architecture/system-architecture.md](architecture/system-architecture.md), [adr/0008](adr/0008-web-client-stack.md), [adr/0009](adr/0009-web-session-and-token-handling.md). Detailed diagrams, data model, API contracts and threat model are in `docs/architecture/` and `docs/security/`.
+
 ## System boundaries
 
 | Boundary | Initial responsibility | Data sensitivity |
