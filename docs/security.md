@@ -15,7 +15,7 @@ The application handles identity, health, and financial information. The default
 | Uploads | Enforce MIME/type limits, size limits, malware scanning, quarantine, encryption, and explicit retention |
 | AI | Ground output in user-approved records, show provenance and timestamps, avoid diagnosis claims, and provide safe fallback states |
 | Exports | Require an explicit review and confirmation step before generating or sharing expense or health exports |
-| Infrastructure | Use separate projects and service accounts, least privilege, CMEK where required, perimeter controls, monitoring, and tested incident response |
+| Infrastructure | Use separate projects and service accounts, least privilege, application-level encryption of sensitive fields (provider-managed keys only on Vercel/Neon; see hosting-and-compliance), perimeter controls and rate limits, monitoring, and tested incident response |
 
 ## My Number handling
 
