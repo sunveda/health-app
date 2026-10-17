@@ -8,7 +8,8 @@ Operating notes for any coding agent working in this repository.
 2. **[docs/STACK.md](docs/STACK.md)** — **one-screen tech map** (all technologies / versions / boundaries).
 3. **[docs/SPEC.md](docs/SPEC.md)** — specification index and docs-first writing order.
 4. [README.md](README.md)
-5. [docs/architecture.md](docs/architecture.md), [docs/security.md](docs/security.md), [docs/privacy-baseline.md](docs/privacy-baseline.md)
+5. Draft specs: [product-spec](docs/product-spec.md), [technical-spec](docs/technical-spec.md), [mvp-screens](docs/mvp-screens.md)
+6. [docs/architecture.md](docs/architecture.md), [docs/security.md](docs/security.md), [docs/privacy-baseline.md](docs/privacy-baseline.md)
 
 ## Product in one line
 

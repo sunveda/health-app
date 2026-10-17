@@ -42,6 +42,8 @@ Repo: https://github.com/sunveda/health-app
 - Allowed PRs: STACK/SPEC/architecture/security/privacy drafts, CONTEXT updates, trivial AGENTS/README links, owner-requested security fixes.
 - Disallowed: inventing endpoints/scopes/credentials; new feature UI or kit wiring.
 
+- **Draft specs added (pending owner review):** [product-spec.md](product-spec.md) (S1), [technical-spec.md](technical-spec.md), [mvp-screens.md](mvp-screens.md) (S2). Identity remains blocked; no feature coding.
+
 ### `main` (approx.)
 
 - Native app shells + Core/platform composition roots with NotConfigured adapters

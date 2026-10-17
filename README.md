@@ -44,6 +44,7 @@ As of **2026-09-29**, the active track is **docs & specification** ([STACK.md](d
 - [**STACK (one-screen tech map)**](docs/STACK.md)
 - [**SPEC (specification index)**](docs/SPEC.md)
 - [**CONTEXT (living handoff)**](docs/CONTEXT.md)
+- [`docs/product-spec.md`](docs/product-spec.md), [`docs/technical-spec.md`](docs/technical-spec.md), [`docs/mvp-screens.md`](docs/mvp-screens.md) (draft)
 - [`docs/architecture.md`](docs/architecture.md)
 - [`docs/security.md`](docs/security.md)
 - [`docs/privacy-baseline.md`](docs/privacy-baseline.md)

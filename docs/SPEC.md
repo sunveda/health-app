@@ -22,8 +22,9 @@ This file is the **table of contents for what we will specify**. It does not inv
 | ID | Spec | Purpose | Status | Source of truth today |
 |---|---|---|---|---|
 | S0 | Stack & boundaries | One-screen tech + system map | **Draft** | [STACK.md](STACK.md), [architecture.md](architecture.md) |
-| S1 | Product vision & non-goals | Who it is for, what we refuse to build | **Needs draft** | CONTEXT one-liner only |
-| S2 | Information architecture | Screens, tabs, empty/error/blocked states | **Needs draft** | Feature tab shells in code (no UX spec) |
+| S1 | Product vision & non-goals | Who it is for, what we refuse to build | **Draft** | [product-spec.md](product-spec.md) |
+| S2 | Information architecture | Screens, tabs, empty/error/blocked states | **Draft** | [mvp-screens.md](mvp-screens.md) |
+| S2b | Technical specification | Layout, adapters, built-vs-stub, staging, CI gates | **Draft** | [technical-spec.md](technical-spec.md) |
 | S3 | Shared contracts | JSON Schema for portal payloads | **Scaffold** | `packages/contracts/schemas/portal.json` |
 | S4 | Security & threat model | Controls, checklist, fail-closed rules | **Baseline draft** | [security.md](security.md) |
 | S5 | Privacy & data classification | Categories, device boundary, logging | **Baseline draft** | [privacy-baseline.md](privacy-baseline.md) |
@@ -86,6 +87,7 @@ Capture answers in CONTEXT when decided; do not encode guesses into schemas.
 
 ## Related
 
+- [product-spec.md](product-spec.md), [technical-spec.md](technical-spec.md), [mvp-screens.md](mvp-screens.md) — draft specs
 - [CONTEXT.md](CONTEXT.md) — living status  
 - [STACK.md](STACK.md) — tech one-pager  
 - [architecture.md](architecture.md) — staged delivery  
