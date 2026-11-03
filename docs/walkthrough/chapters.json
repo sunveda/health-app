@@ -1,0 +1,74 @@
+[
+  {
+    "title": "Health App",
+    "badge": "CURRENT + PLANNED \u00b7 CLEARLY SEPARATED",
+    "start": 0,
+    "duration": 14.104626
+  },
+  {
+    "title": "The specification",
+    "badge": "APPROVED DIRECTION \u00b7 NOT DEPLOYED",
+    "start": 14.104626,
+    "duration": 17.609615
+  },
+  {
+    "title": "Home",
+    "badge": "ILLUSTRATIVE NATIVE LAYOUT \u00b7 NOT A SIMULATOR CAPTURE",
+    "start": 31.714241,
+    "duration": 16.707982
+  },
+  {
+    "title": "Health",
+    "badge": "ILLUSTRATIVE NATIVE LAYOUT \u00b7 INTEGRATIONS DISABLED",
+    "start": 48.422223,
+    "duration": 18.123991
+  },
+  {
+    "title": "Expenses on web",
+    "badge": "ACTUAL WEB CAPTURE \u00b7 LOCAL SYNTHETIC BUILD",
+    "start": 66.546214,
+    "duration": 17.051746
+  },
+  {
+    "title": "Review the numbers",
+    "badge": "ACTUAL WEB CAPTURE \u00b7 SYNTHETIC RECORDS",
+    "start": 83.59796,
+    "duration": 19.99424
+  },
+  {
+    "title": "Review exceptions",
+    "badge": "ACTUAL WEB CAPTURE \u00b7 REVIEW REQUIRED",
+    "start": 103.5922,
+    "duration": 19.259365
+  },
+  {
+    "title": "Acknowledge, then inspect",
+    "badge": "ACTUAL WEB CAPTURE \u00b7 NOTHING CREATED OR SHARED",
+    "start": 122.85156500000001,
+    "duration": 17.573878
+  },
+  {
+    "title": "Phone-size experience",
+    "badge": "ACTUAL MOBILE-WIDTH WEB \u00b7 NOT iOS / ANDROID RUNTIME",
+    "start": 140.425443,
+    "duration": 17.095057
+  },
+  {
+    "title": "Settings",
+    "badge": "ILLUSTRATIVE NATIVE LAYOUT \u00b7 NOT A SIMULATOR CAPTURE",
+    "start": 157.5205,
+    "duration": 19.889252
+  },
+  {
+    "title": "The intended journey",
+    "badge": "PLANNED FLOW \u00b7 NOT IMPLEMENTED OR VERIFIED",
+    "start": 177.409752,
+    "duration": 21.49093
+  },
+  {
+    "title": "What is verified",
+    "badge": "LOCAL VERIFICATION \u00b7 NO DEPLOYMENT",
+    "start": 198.900682,
+    "duration": 20.022857
+  }
+]

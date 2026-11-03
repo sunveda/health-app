@@ -1,0 +1,175 @@
+1
+00:00:00,000 --> 00:00:04,202
+Health App is a planned health and wellness portal for web, iOS and Android. This
+
+2
+00:00:04,202 --> 00:00:08,403
+walkthrough separates working synthetic screens from illustrative native layouts and
+
+3
+00:00:08,403 --> 00:00:12,605
+future flows. It does not demonstrate a clinical-ready product.
+
+4
+00:00:14,105 --> 00:00:19,474
+The approved architecture uses Next.js and a server-side backend for frontend on the web,
+
+5
+00:00:19,474 --> 00:00:24,844
+SwiftUI on iOS, and Kotlin Compose on Android. Clients share contracts and fixtures.
+
+6
+00:00:24,844 --> 00:00:30,214
+Vercel and Neon are hosting targets, not a deployed service. AI is deferred.
+
+7
+00:00:31,714 --> 00:00:36,784
+The native Home screen is a readiness overview. This illustration follows the current
+
+8
+00:00:36,784 --> 00:00:41,853
+source, but is not a simulator capture. Identity, wellness sync and the clinical pipeline
+
+9
+00:00:41,853 --> 00:00:46,922
+remain not configured. There is no working My Number sign-in or personal health dashboard.
+
+10
+00:00:48,422 --> 00:00:52,578
+The Health tab shows source availability, permission state, read scopes and clinical
+
+11
+00:00:52,578 --> 00:00:56,734
+status. This is an illustrative layout. Apple Health and Health Connect are not connected.
+
+12
+00:00:56,734 --> 00:01:00,890
+Clinical validation, quarantine and uploads are also not configured, and no device
+
+13
+00:01:00,890 --> 00:01:05,046
+permissions are requested.
+
+14
+00:01:06,546 --> 00:01:11,730
+Here is the actual web implementation, captured from the local production build. It opens
+
+15
+00:01:11,730 --> 00:01:16,914
+directly to a synthetic expense demonstration. The notice explains that these are sample
+
+16
+00:01:16,914 --> 00:01:22,098
+records and engineering rules, not tax guidance. There is no sign-in or file import.
+
+17
+00:01:23,598 --> 00:01:28,222
+For the documented consultation sample, fifteen thousand yen paid minus three thousand yen
+
+18
+00:01:28,222 --> 00:01:32,845
+reimbursed gives an illustrative included amount of twelve thousand yen. The screen shows
+
+19
+00:01:32,845 --> 00:01:37,469
+the category, documentation flag, arithmetic and outcome. These are fixture rules, not a
+
+20
+00:01:37,469 --> 00:01:42,092
+completed Japanese tax calculator.
+
+21
+00:01:43,592 --> 00:01:48,032
+Changing scenarios reveals review conditions. This mixed example includes six thousand yen
+
+22
+00:01:48,032 --> 00:01:52,472
+and flags an undocumented line. Other samples cover unknown categories, negative amounts,
+
+23
+00:01:52,472 --> 00:01:56,912
+over-reimbursement and empty records. Changing the scenario clears the acknowledgment and
+
+24
+00:01:56,912 --> 00:02:01,352
+any export placeholder.
+
+25
+00:02:02,852 --> 00:02:06,870
+The export placeholder button begins disabled. After acknowledging the synthetic-data
+
+26
+00:02:06,870 --> 00:02:10,889
+limitation, the user can view an explanation that export is not configured. No file is
+
+27
+00:02:10,889 --> 00:02:14,907
+created or shared. Revoking acknowledgment hides the message. Real exports remain
+
+28
+00:02:14,907 --> 00:02:18,925
+disabled.
+
+29
+00:02:20,425 --> 00:02:24,324
+This capture shows the same web flow at phone width. It is responsive web, not an iOS or
+
+30
+00:02:24,324 --> 00:02:28,223
+Android simulator. Native Expense screens have also been implemented using the same
+
+31
+00:02:28,223 --> 00:02:32,122
+generated fixtures, but their full builds and device user interfaces have not been
+
+32
+00:02:32,122 --> 00:02:36,020
+verified here.
+
+33
+00:02:37,520 --> 00:02:42,118
+The Settings tab exposes privacy and platform capability status. This source-based
+
+34
+00:02:42,118 --> 00:02:46,715
+illustration shows consent, crash reporting and telemetry as not configured. Identity,
+
+35
+00:02:46,715 --> 00:02:51,312
+biometrics, secure storage and NFC are also stubs. The expense acknowledgment is not
+
+36
+00:02:51,312 --> 00:02:55,910
+consent to collect health data.
+
+37
+00:02:57,410 --> 00:03:02,407
+The future journey would connect reviewed identity and consent, approved health sources or
+
+38
+00:03:02,407 --> 00:03:07,405
+secure clinical uploads, record review, reviewed expense calculations, and separately
+
+39
+00:03:07,405 --> 00:03:12,403
+confirmed exports. These steps are planned, not functioning integrations. Official
+
+40
+00:03:12,403 --> 00:03:17,401
+provider, security, privacy and legal decisions are still required.
+
+41
+00:03:18,901 --> 00:03:23,531
+The web production build, lint, type checks and four desktop and mobile browser tests
+
+42
+00:03:23,531 --> 00:03:28,162
+passed. Nine fixture scenarios match the generated models. Swift syntax and model parity
+
+43
+00:03:28,162 --> 00:03:32,793
+were checked. Native builds, device testing, localization and real integrations remain
+
+44
+00:03:32,793 --> 00:03:37,424
+outstanding. Nothing has been deployed.

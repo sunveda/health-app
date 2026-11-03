@@ -33,6 +33,12 @@ Repo: https://github.com/sunveda/health-app
 - **Identity (My Number IdP):** deliberately **not wired** — blocked pending official provider docs, registration, compliance, threat-model review
 - Full version matrix: [STACK.md](STACK.md)
 
+## Video documentation update
+
+- Owner requested a repository-stored video of specifications, screens and user flow. See [walkthrough](walkthrough/README.md).
+- Documentation-only branch: actual local synthetic web captures plus explicitly labeled native illustrations and planned flows. Implementation snapshot `64334b8` remains in its separate local branch.
+- No application source, integrations, credentials, deployment or repository visibility changed. Native runtime verification remains unavailable on this executor.
+
 ## Current status (2026-09-29)
 
 ### Direction change — docs & specification first
